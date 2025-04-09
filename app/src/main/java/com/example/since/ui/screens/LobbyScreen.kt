@@ -8,13 +8,13 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.example.since.ui.components.StreakCard
 import com.example.since.ui.screens.AddStreakScreen
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun LobbyScreen(modifier: Modifier = Modifier) {
+fun LobbyScreen(onNavigateToActive: () -> Unit) {
     var showForm by remember { mutableStateOf(false) }
-
     var activeStreak by remember { mutableStateOf<Pair<String, String>?>(null) }
 
     Scaffold(
@@ -39,8 +39,33 @@ fun LobbyScreen(modifier: Modifier = Modifier) {
                 Text("No active streak. Add one to get started.")
             } else {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text(text = "Streak: ${activeStreak!!.first}", style = MaterialTheme.typography.headlineSmall)
-                    Text(text = "\"${activeStreak!!.second}\"", style = MaterialTheme.typography.bodyMedium)
+
+                    val mockStreaks = listOf(
+                        Triple("No Smoking", "You promised her you wouldn't.", 86400000L),
+                        Triple("No Phone", "Digital detox mode!", 3600000L),
+                        Triple("No Weed", "physical detox mode!", 3600000L)
+                    )
+
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(horizontal = 16.dp)
+                            .padding(top = 32.dp),
+                        verticalArrangement = Arrangement.spacedBy(20.dp)
+                    )
+                        {
+                        mockStreaks.forEachIndexed { index, (name, clause, best) ->
+                            StreakCard(
+                                name = name,
+                                clause = clause,
+                                personalBest = best,
+                                resetTimestamp = System.currentTimeMillis() - best,
+                                onStart = { /* Placeholder */ },
+                                onDelete = { /* Placeholder */ }
+                            )
+                        }
+                    }
+
                 }
             }
         }
@@ -50,6 +75,7 @@ fun LobbyScreen(modifier: Modifier = Modifier) {
                 onSubmit = { name, clause ->
                     activeStreak = name to clause
                     showForm = false
+                    //onNavigateToActive()
                 },
                 onDismiss = {
                     showForm = false
