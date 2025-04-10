@@ -137,7 +137,8 @@ fun ActiveStreakScreen(
             title = { Text("Are you sure?") },
             text = {
                 Column {
-                    Text("This will reset your current streak.")
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text("Message to yourself:")
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
                         activeStreak!!.resetClause,
@@ -157,8 +158,8 @@ fun ActiveStreakScreen(
             dismissButton = {
                 Button(onClick = { showResetDialog = false },
                     colors = ButtonDefaults.buttonColors(
-                        Color(0xFF4ED508),
-                        Color(0xFFF803FF)
+                        Color(0xFF4CAF50),
+                        Color(0xFF000000)
                     )
                 ) {
                     Text("No, I can fight this")
