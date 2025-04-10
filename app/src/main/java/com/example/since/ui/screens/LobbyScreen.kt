@@ -1,5 +1,6 @@
 package com.example.since.ui.screens
 
+import android.util.Log
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -8,10 +9,8 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.since.data.UserStreak
 import com.example.since.ui.components.StreakCard
-import com.example.since.ui.screens.AddStreakScreen
 import com.example.since.viewmodel.MainViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -56,7 +55,11 @@ fun LobbyScreen(viewModel: MainViewModel, onNavigateToActive: () -> Unit) {
                                 clause = streak.resetClause,
                                 personalBest = streak.personalBest,
                                 resetTimestamp = streak.resetTimestamp,
-                                onStart = { onNavigateToActive() },
+                                onStart = {
+                                    Log.d("LobbyScreen", "Start button clicked for ${streak.name}")
+                                    viewModel.setActiveStreak(streak)
+                                    onNavigateToActive()
+                                },
                                 onDelete = { viewModel.deleteStreak(streak) }
                             )
                         }

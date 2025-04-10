@@ -8,6 +8,7 @@ import com.example.since.data.StreakDao
 import com.example.since.data.UserStreak
 import com.example.since.model.StreakCalculator
 import com.example.since.model.StreakDuration
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
@@ -24,6 +25,8 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     private val _activeStreak = MutableStateFlow<UserStreak?>(null)
     val activeStreak: StateFlow<UserStreak?> = _activeStreak.asStateFlow()
+
+    private var timerJob: Job? = null
 
     init {
         loadRecentStreaks()
@@ -43,7 +46,9 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun startTickingTimer(resetTime: Long) {
-        viewModelScope.launch {
+        timerJob?.cancel()
+
+        timerJob = viewModelScope.launch {
             while (true) {
                 _timer.value = StreakCalculator.getDetailedDurationSince(resetTime)
                 delay(1000)
@@ -87,6 +92,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         viewModelScope.launch {
             dao.updateStreak(updated)
             _activeStreak.value = updated
+            startTickingTimer(currentTime)
         }
     }
 
@@ -101,5 +107,19 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             }
         }
     }
+
+    fun setActiveStreak(streak: UserStreak) {
+        viewModelScope.launch {
+
+            dao.clearActiveStreak()
+            val updated = streak.copy(
+                resetTimestamp = System.currentTimeMillis(),
+                isActive = true
+            )
+            dao.updateStreak(updated)
+            loadRecentStreaks()
+        }
+    }
+
 
 }

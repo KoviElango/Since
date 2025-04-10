@@ -17,6 +17,7 @@ import com.example.since.viewmodel.MainViewModel
 @Composable
 fun ActiveStreakScreen(
     viewModel: MainViewModel,
+    onResetComplete: () -> Unit
 ) {
     val activeStreak by viewModel.activeStreak.collectAsState()
     val timer by viewModel.timer.collectAsState()
@@ -65,7 +66,7 @@ fun ActiveStreakScreen(
                                 )
                             )
                         }
-                        Divider(
+                        HorizontalDivider(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(vertical = 24.dp),
@@ -102,6 +103,7 @@ fun ActiveStreakScreen(
                 TextButton(onClick = {
                     showResetDialog = false
                     viewModel.resetStreak(activeStreak!!)
+                    onResetComplete()
                 }) {
                     Text("Yes, I give up")
                 }

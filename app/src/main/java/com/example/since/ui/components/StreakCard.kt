@@ -6,7 +6,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.example.since.model.StreakDuration
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -41,7 +40,7 @@ fun StreakCard(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                OutlinedButton(onClick = { /* TODO: onStart callback */ }) {
+                OutlinedButton(onClick = onStart){
                     Text("Start")
                 }
                 TextButton(onClick = onDelete) {
