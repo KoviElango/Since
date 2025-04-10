@@ -1,5 +1,6 @@
 package com.example.since.ui.screens
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
@@ -8,10 +9,18 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.unit.dp
 import com.example.since.ui.components.EditStreakDialog
+import com.example.since.ui.components.TimerBlock
 import com.example.since.viewmodel.MainViewModel
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
+import com.example.since.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -25,7 +34,14 @@ fun ActiveStreakScreen(
     var showEditDialog by remember { mutableStateOf(false) }
 
     Scaffold(
-        topBar = { TopAppBar(title = { Text("Since") }) },
+        topBar = { TopAppBar(title = {
+            Image(
+                painter = painterResource(id = R.drawable.ic_launcher),
+                contentDescription = "Since Logo",
+                modifier = Modifier
+                    .height(120.dp)
+            )
+        }) },
         floatingActionButton = {
             activeStreak?.let {
                 FloatingActionButton(onClick = { showEditDialog = true }) {
@@ -54,17 +70,36 @@ fun ActiveStreakScreen(
                             modifier = Modifier
                                 .padding(vertical = 32.dp)
                                 .background(
-                                    color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.1f),
+                                    brush = Brush.linearGradient(
+                                        colors = listOf(
+                                            Color(0xFF185A72).copy(alpha = 0.2f),
+                                            Color(0xFF020824).copy(alpha = 0.4f)
+                                        )
+                                    ),
                                     shape = MaterialTheme.shapes.medium
                                 )
                                 .padding(horizontal = 24.dp, vertical = 12.dp)
-                        ) {
-                            Text(
-                                text = "${timer.days}d ${timer.hours}h ${timer.minutes}m ${timer.seconds}s",
-                                style = MaterialTheme.typography.displaySmall.copy(
-                                    fontFamily = FontFamily.Monospace
+                                .semantics { contentDescription = "Timer showing your current streak duration" }
+                        )
+                        {
+                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                TimerBlock(
+                                    value = timer.days,
+                                    label = "Days",
+                                    large = true
                                 )
-                            )
+                                Spacer(modifier = Modifier.height(16.dp))
+
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.SpaceEvenly
+                                ) {
+                                    TimerBlock(value = timer.hours, label = "Hours")
+                                    TimerBlock(value = timer.minutes, label = "Minutes")
+                                    TimerBlock(value = timer.seconds, label = "Seconds")
+                                }
+                            }
+
                         }
                         HorizontalDivider(
                             modifier = Modifier
@@ -72,6 +107,17 @@ fun ActiveStreakScreen(
                                 .padding(vertical = 24.dp),
                             thickness = 1.dp,
                             color = MaterialTheme.colorScheme.outlineVariant
+                        )
+
+                        Text(
+                            """
+                                “ You’ll never change your life until you change something you do daily. 
+                               The secret of your success is found in your daily routine. ”
+                            """
+                                .trimIndent(),
+                            fontStyle = FontStyle.Italic,
+                            fontFamily = FontFamily.Monospace,
+                            style = MaterialTheme.typography.bodyMedium
                         )
                     }
                     Button(onClick = { showResetDialog = true }) {
@@ -95,7 +141,7 @@ fun ActiveStreakScreen(
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
                         activeStreak!!.resetClause,
-                        style = MaterialTheme.typography.bodyMedium
+                        style = MaterialTheme.typography.titleMedium
                     )
                 }
             },
@@ -109,7 +155,12 @@ fun ActiveStreakScreen(
                 }
             },
             dismissButton = {
-                TextButton(onClick = { showResetDialog = false }) {
+                Button(onClick = { showResetDialog = false },
+                    colors = ButtonDefaults.buttonColors(
+                        Color(0xFF4ED508),
+                        Color(0xFFF803FF)
+                    )
+                ) {
                     Text("No, I can fight this")
                 }
             }
