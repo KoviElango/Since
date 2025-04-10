@@ -7,17 +7,23 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.example.since.ui.screens.ActiveStreakScreen
 import com.example.since.ui.screens.LobbyScreen
+import com.example.since.viewmodel.MainViewModel
 
 @Composable
-fun AppNavGraph(navController: NavHostController, modifier: Modifier = Modifier) {
+fun AppNavGraph(navController: NavHostController,
+                viewModel: MainViewModel,
+                modifier: Modifier = Modifier)
+{
     NavHost(navController = navController, startDestination = Screen.Lobby.route, modifier = modifier) {
         composable(Screen.Lobby.route) {
-            LobbyScreen(onNavigateToActive = {
+            LobbyScreen(
+                viewModel = viewModel,
+                onNavigateToActive = {
                 navController.navigate(Screen.ActiveStreak.route)
             })
         }
         composable(Screen.ActiveStreak.route) {
-            ActiveStreakScreen()
+            ActiveStreakScreen(viewModel = viewModel)
         }
     }
 }

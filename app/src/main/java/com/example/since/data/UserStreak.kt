@@ -9,6 +9,7 @@ data class UserStreak(
     val name: String,
     val resetClause: String,
     val resetTimestamp: Long,
-    val personalBest: Long = 0L
+    val personalBest: Long = 0L,
+    val isActive: Boolean = false
 )
 

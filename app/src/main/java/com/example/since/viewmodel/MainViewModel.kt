@@ -22,6 +22,9 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     private val _timer = MutableStateFlow(StreakDuration(0, 0, 0, 0))
     val timer: StateFlow<StreakDuration> = _timer.asStateFlow()
 
+    private val _activeStreak = MutableStateFlow<UserStreak?>(null)
+    val activeStreak: StateFlow<UserStreak?> = _activeStreak.asStateFlow()
+
     init {
         loadRecentStreaks()
     }
@@ -30,6 +33,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         viewModelScope.launch {
             val recent = dao.getRecentStreaks()
             _streaks.value = recent
+            _activeStreak.value = dao.getActiveStreak()
 
             val active = recent.firstOrNull()
             active?.let {
@@ -49,16 +53,17 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     fun addOrReplaceStreak(newStreak: UserStreak) {
         viewModelScope.launch {
+            dao.clearActiveStreak()
             val existing = dao.getRecentStreaks()
+            val streakWithActive = newStreak.copy(isActive = true)
 
             if (existing.size < 3) {
-                dao.insertStreak(newStreak)
+                dao.insertStreak(streakWithActive)
             } else {
                 val oldest = existing.minByOrNull { it.resetTimestamp }
                 val updated = newStreak.copy(id = oldest!!.id)
                 dao.updateStreak(updated)
             }
-
             loadRecentStreaks()
         }
     }
@@ -81,7 +86,20 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
         viewModelScope.launch {
             dao.updateStreak(updated)
-            loadRecentStreaks()
+            _activeStreak.value = updated
         }
     }
+
+    fun updateStreakDetails(id: Int, name: String, clause: String) {
+        viewModelScope.launch {
+            val current = dao.getStreakById(id)
+            if (current != null) {
+                val updated = current.copy(name = name, resetClause = clause)
+                dao.updateStreak(updated)
+                _activeStreak.value = updated
+                loadRecentStreaks()
+            }
+        }
+    }
+
 }

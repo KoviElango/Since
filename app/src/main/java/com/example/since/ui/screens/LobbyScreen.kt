@@ -8,14 +8,17 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.since.data.UserStreak
 import com.example.since.ui.components.StreakCard
 import com.example.since.ui.screens.AddStreakScreen
+import com.example.since.viewmodel.MainViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun LobbyScreen(onNavigateToActive: () -> Unit) {
+fun LobbyScreen(viewModel: MainViewModel, onNavigateToActive: () -> Unit) {
+    val streaks by viewModel.streaks.collectAsState()
     var showForm by remember { mutableStateOf(false) }
-    var activeStreak by remember { mutableStateOf<Pair<String, String>?>(null) }
 
     Scaffold(
         topBar = {
@@ -35,37 +38,29 @@ fun LobbyScreen(onNavigateToActive: () -> Unit) {
                 .padding(padding),
             contentAlignment = Alignment.Center
         ) {
-            if (activeStreak == null) {
+            if (streaks.isEmpty()) {
                 Text("No active streak. Add one to get started.")
-            } else {
+            }
+            else {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
-
-                    val mockStreaks = listOf(
-                        Triple("No Smoking", "You promised her you wouldn't.", 86400000L),
-                        Triple("No Phone", "Digital detox mode!", 3600000L),
-                        Triple("No Weed", "physical detox mode!", 3600000L)
-                    )
-
                     Column(
                         modifier = Modifier
                             .fillMaxSize()
                             .padding(horizontal = 16.dp)
                             .padding(top = 32.dp),
                         verticalArrangement = Arrangement.spacedBy(20.dp)
-                    )
-                        {
-                        mockStreaks.forEachIndexed { index, (name, clause, best) ->
+                    ) {
+                        streaks.forEach { streak ->
                             StreakCard(
-                                name = name,
-                                clause = clause,
-                                personalBest = best,
-                                resetTimestamp = System.currentTimeMillis() - best,
-                                onStart = { /* Placeholder */ },
-                                onDelete = { /* Placeholder */ }
+                                name = streak.name,
+                                clause = streak.resetClause,
+                                personalBest = streak.personalBest,
+                                resetTimestamp = streak.resetTimestamp,
+                                onStart = { onNavigateToActive() },
+                                onDelete = { viewModel.deleteStreak(streak) }
                             )
                         }
                     }
-
                 }
             }
         }
@@ -73,9 +68,15 @@ fun LobbyScreen(onNavigateToActive: () -> Unit) {
         if (showForm) {
             AddStreakScreen(
                 onSubmit = { name, clause ->
-                    activeStreak = name to clause
+                    val newStreak = UserStreak(
+                        name = name,
+                        resetClause = clause,
+                        resetTimestamp = System.currentTimeMillis(),
+                        personalBest = 0L
+                    )
+                    viewModel.addOrReplaceStreak(newStreak)
                     showForm = false
-                    //onNavigateToActive()
+                    onNavigateToActive()
                 },
                 onDismiss = {
                     showForm = false

@@ -1,0 +1,133 @@
+# Since App – Codebase Cheat Sheet
+
+A quick reference for your app development workflow.
+
+---
+
+##  Project Structure (MVVM)
+
+```
+com.example.since/
+│
+├── data/
+│   ├── UserStreak.kt         # Data class with Room annotations
+│   ├── StreakDao.kt          # DAO with Room queries
+│   └── SinceDatabase.kt      # Singleton Room database instance
+│
+├── model/
+│   ├── StreakDuration.kt     # Stores days, hours, mins, secs
+│   └── StreakCalculator.kt   # Time calculation logic
+│
+├── ui/
+│   ├── screens/
+│   │   ├── LobbyScreen.kt         # Main screen showing streak cards
+│   │   ├── AddStreakScreen.kt     # Dialog for adding/editing streaks
+│   │   └── ActiveStreakScreen.kt  # Live timer view with reset/edit
+│   └── components/
+│       └── StreakCard.kt          # UI card component
+│
+└── viewmodel/
+    └── MainViewModel.kt      # Manages data and UI logic
+```
+
+---
+
+##  ViewModel: `MainViewModel.kt`
+
+Handles business logic:
+
+- `loadRecentStreaks()` → Loads latest 3 streaks
+- `addOrReplaceStreak()` → Inserts or replaces oldest streak
+- `deleteStreak()` → Deletes a streak
+- `resetStreak()` → Resets timer and updates personal best
+- `updateStreakDetails()` → Edits streak name and clause
+- `startTickingTimer()` → Live timer update using coroutine
+
+---
+
+##  Database
+
+### `UserStreak.kt`
+```kotlin
+@Entity(tableName = "streaks")
+data class UserStreak(
+    @PrimaryKey(autoGenerate = true) val id: Int = 0,
+    val name: String,
+    val resetClause: String,
+    val resetTimestamp: Long,
+    val personalBest: Long = 0L,
+    val isActive: Boolean = false
+)
+```
+
+### `StreakDao.kt`
+```kotlin
+@Dao
+interface StreakDao {
+    @Insert suspend fun insertStreak(streak: UserStreak)
+    @Update suspend fun updateStreak(streak: UserStreak)
+    @Delete suspend fun deleteStreak(streak: UserStreak)
+
+    @Query("SELECT * FROM streaks ORDER BY resetTimestamp DESC LIMIT 3")
+    suspend fun getRecentStreaks(): List<UserStreak>
+
+    @Query("UPDATE streaks SET isActive = 0")
+    suspend fun clearActiveStreak()
+
+    @Query("SELECT * FROM streaks WHERE isActive = 1 LIMIT 1")
+    suspend fun getActiveStreak(): UserStreak?
+}
+```
+
+---
+
+##  Screens
+
+### `LobbyScreen.kt`
+- FAB → Add new streak
+- Uses `StreakCard.kt`
+- Interacts with: `addOrReplaceStreak()`, `deleteStreak()`
+
+### `AddStreakScreen.kt`
+- Dialog UI with:
+  - Habit Name
+  - Final Reminder
+  - Instructions
+- Used for both **adding** and **editing**
+
+### `ActiveStreakScreen.kt`
+- Displays:
+  - Streak Name
+  - Live timer (`StreakDuration`)
+  - Reset confirmation
+  - Edit button (opens `AddStreakScreen` pre-filled)
+
+---
+
+##  Timer Logic
+
+Stored in `StreakDuration.kt`:
+```kotlin
+data class StreakDuration(
+    val days: Int,
+    val hours: Int,
+    val minutes: Int,
+    val seconds: Int
+)
+```
+
+Updated using:
+```kotlin
+val diff = now - resetTimestamp
+// Convert to time units via StreakCalculator
+```
+
+---
+
+## Connected Flow
+
+1. **User adds streak** → `AddStreakScreen` → `addOrReplaceStreak()`
+2. **Lobby updates** → `loadRecentStreaks()`
+3. **One is marked active** → `isActive = true`
+4. **Timer ticks** → `startTickingTimer()`
+5. **Reset or Edit** from Active view
