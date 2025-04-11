@@ -36,11 +36,16 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         viewModelScope.launch {
             val recent = dao.getRecentStreaks()
             _streaks.value = recent
-            _activeStreak.value = dao.getActiveStreak()
 
-            val active = recent.firstOrNull()
-            active?.let {
-                startTickingTimer(it.resetTimestamp)
+            val active = dao.getActiveStreak()
+            _activeStreak.value = active
+
+            timerJob?.cancel()
+
+            if (active != null) {
+                startTickingTimer(active.resetTimestamp)
+            } else {
+                _timer.value = StreakDuration(0, 0, 0, 0)
             }
         }
     }
@@ -60,18 +65,22 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         viewModelScope.launch {
             dao.clearActiveStreak()
             val existing = dao.getRecentStreaks()
-            val streakWithActive = newStreak.copy(isActive = true)
+            val newActive = newStreak.copy(isActive = true)
 
             if (existing.size < 3) {
-                dao.insertStreak(streakWithActive)
+                dao.insertStreak(newActive)
             } else {
                 val oldest = existing.minByOrNull { it.resetTimestamp }
-                val updated = newStreak.copy(id = oldest!!.id)
-                dao.updateStreak(updated)
+                if (oldest != null) {
+                    val updated = newActive.copy(id = oldest.id)
+                    dao.updateStreak(updated)
+                }
             }
+
             loadRecentStreaks()
         }
     }
+
 
     fun deleteStreak(streak: UserStreak) {
         viewModelScope.launch {
@@ -86,13 +95,18 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
         val updated = current.copy(
             resetTimestamp = currentTime,
-            personalBest = maxOf(current.personalBest, elapsed)
+            personalBest = maxOf(current.personalBest, elapsed),
+            isActive = false
         )
 
         viewModelScope.launch {
             dao.updateStreak(updated)
-            _activeStreak.value = updated
-            startTickingTimer(currentTime)
+
+            _activeStreak.value = null
+            timerJob?.cancel()
+            _timer.value = StreakDuration(0, 0, 0, 0)
+
+            loadRecentStreaks()
         }
     }
 

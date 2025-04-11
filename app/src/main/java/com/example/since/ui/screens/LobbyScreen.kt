@@ -15,12 +15,17 @@ import com.example.since.R
 import com.example.since.data.UserStreak
 import com.example.since.ui.components.StreakCard
 import com.example.since.viewmodel.MainViewModel
+import android.widget.Toast
+import androidx.compose.ui.platform.LocalContext
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LobbyScreen(viewModel: MainViewModel, onNavigateToActive: () -> Unit) {
     val streaks by viewModel.streaks.collectAsState()
     var showForm by remember { mutableStateOf(false) }
+    val context = LocalContext.current
+
 
     Scaffold(
         topBar = {
@@ -36,9 +41,22 @@ fun LobbyScreen(viewModel: MainViewModel, onNavigateToActive: () -> Unit) {
             )
         },
         floatingActionButton = {
-            FloatingActionButton(onClick = { showForm = true }) {
+            FloatingActionButton(
+                onClick = {
+                    if (streaks.size < 3) {
+                        showForm = true
+                    } else {
+                        Toast.makeText(
+                            context,
+                            "Oops! You’re already tracking 3 streaks. Try deleting one to start a new streak.",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+                }
+            ) {
                 Icon(imageVector = Icons.Default.Add, contentDescription = "Add Streak")
             }
+
         }
     ) { padding ->
         Box(

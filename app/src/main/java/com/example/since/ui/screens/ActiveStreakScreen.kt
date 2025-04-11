@@ -19,6 +19,7 @@ import com.example.since.ui.components.TimerBlock
 import com.example.since.viewmodel.MainViewModel
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.res.painterResource
 import com.example.since.R
 
@@ -120,7 +121,16 @@ fun ActiveStreakScreen(
                             style = MaterialTheme.typography.bodyMedium
                         )
                     }
-                    Button(onClick = { showResetDialog = true }) {
+                    OutlinedButton(
+                        onClick = { showResetDialog = true },
+                        colors = ButtonDefaults.outlinedButtonColors(
+                            containerColor = Color.Transparent,
+                            contentColor = Color.White
+                        ),
+                        border = ButtonDefaults.outlinedButtonBorder.copy(
+                            brush = SolidColor(Color.White)
+                        )
+                    ) {
                         Text("Reset")
                     }
                 }
@@ -158,7 +168,7 @@ fun ActiveStreakScreen(
             dismissButton = {
                 Button(onClick = { showResetDialog = false },
                     colors = ButtonDefaults.buttonColors(
-                        Color(0xFF4CAF50),
+                        Color(0xFFE05E36),
                         Color(0xFF000000)
                     )
                 ) {
