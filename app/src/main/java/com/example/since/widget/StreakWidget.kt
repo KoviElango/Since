@@ -1,6 +1,7 @@
 package com.example.since.widget
 
 import android.content.Context
+import android.graphics.fonts.Font
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -31,11 +32,12 @@ class StreakWidget : GlanceAppWidget() {
                     .fillMaxSize()
                     .background(Color(0xFFFF5722))
                     .clickable(onClick = actionStartActivity<MainActivity>())
-                    .padding(12.dp),
+                    .padding(8.dp),
                 contentAlignment = Alignment.Center
             ) {
                 Column(
-                    verticalAlignment = Alignment.CenterVertically
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Text(
                         text = "$days",
@@ -44,9 +46,9 @@ class StreakWidget : GlanceAppWidget() {
                                 day = Color.White,
                                 night = Color.White
                             ),
-                            fontSize = 50.sp,
+                            fontSize = 100.sp,
                             fontWeight = FontWeight.Bold,
-                            fontFamily = FontFamily.Monospace
+                            fontFamily = FontFamily.Serif
                         )
                     )
 
