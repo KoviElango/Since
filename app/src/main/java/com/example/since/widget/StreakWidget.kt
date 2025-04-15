@@ -22,6 +22,10 @@ import com.example.since.MainActivity
 class StreakWidget : GlanceAppWidget() {
     override suspend fun provideGlance(context: Context, id: GlanceId) {
         provideContent {
+
+            val prefs = context.getSharedPreferences("widget_prefs", Context.MODE_PRIVATE)
+            val days = prefs.getLong("streak_days", 0L)
+
             Box(
                 modifier = GlanceModifier
                     .fillMaxSize()
@@ -34,7 +38,7 @@ class StreakWidget : GlanceAppWidget() {
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = "18",
+                        text = "$days",
                         style = TextStyle(
                             color = ColorProvider(
                                 day = Color.White,

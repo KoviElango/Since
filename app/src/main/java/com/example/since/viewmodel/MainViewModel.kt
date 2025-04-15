@@ -1,6 +1,8 @@
 package com.example.since.viewmodel
 
 import android.app.Application
+import android.content.Context
+import androidx.glance.appwidget.GlanceAppWidgetManager
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.since.data.SinceDatabase
@@ -8,10 +10,12 @@ import com.example.since.data.StreakDao
 import com.example.since.data.UserStreak
 import com.example.since.model.StreakCalculator
 import com.example.since.model.StreakDuration
+import com.example.since.widget.StreakWidget
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import androidx.core.content.edit
 
 class MainViewModel(application: Application) : AndroidViewModel(application) {
 
@@ -56,6 +60,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         timerJob = viewModelScope.launch {
             while (true) {
                 _timer.value = StreakCalculator.getDetailedDurationSince(resetTime)
+                saveWidgetStreakToPrefs(_timer.value.days)
                 delay(1000)
             }
         }
@@ -132,6 +137,19 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             )
             dao.updateStreak(updated)
             loadRecentStreaks()
+        }
+    }
+    private fun saveWidgetStreakToPrefs(days: Long) {
+        val context = getApplication<Application>().applicationContext
+        val prefs = context.getSharedPreferences("widget_prefs", Context.MODE_PRIVATE)
+        prefs.edit { putLong("streak_days", days) }
+
+        val manager = GlanceAppWidgetManager(context)
+        viewModelScope.launch {
+            val ids = manager.getGlanceIds(StreakWidget::class.java)
+            ids.forEach { id ->
+                StreakWidget().update(context, id)
+            }
         }
     }
 
