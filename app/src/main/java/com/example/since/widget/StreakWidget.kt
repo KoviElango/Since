@@ -1,8 +1,7 @@
 package com.example.since.widget
 
 import android.content.Context
-import android.graphics.fonts.Font
-import androidx.compose.ui.graphics.Color
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.glance.GlanceId
@@ -11,7 +10,6 @@ import androidx.glance.action.actionStartActivity
 import androidx.glance.action.clickable
 import androidx.glance.appwidget.GlanceAppWidget
 import androidx.glance.appwidget.provideContent
-import androidx.glance.color.ColorProvider
 import androidx.glance.layout.*
 import androidx.glance.text.Text
 import androidx.glance.text.TextStyle
@@ -19,18 +17,27 @@ import androidx.glance.text.FontWeight
 import androidx.glance.text.FontFamily
 import androidx.glance.background
 import com.example.since.MainActivity
+import androidx.glance.GlanceTheme
 
 class StreakWidget : GlanceAppWidget() {
     override suspend fun provideGlance(context: Context, id: GlanceId) {
         provideContent {
+            MyGlanceWidgetContent(context)
+        }
+    }
+}
 
-            val prefs = context.getSharedPreferences("widget_prefs", Context.MODE_PRIVATE)
-            val days = prefs.getLong("streak_days", 0L)
+@Composable
+fun MyGlanceWidgetContent(context: Context) {
+    GlanceTheme {
+        val colors = GlanceTheme.colors
+        val prefs = context.getSharedPreferences("widget_prefs", Context.MODE_PRIVATE)
+        val days = prefs.getLong("streak_days", 0L)
 
             Box(
                 modifier = GlanceModifier
                     .fillMaxSize()
-                    .background(Color(0xFFFF5722))
+                    .background(colors.primary)
                     .clickable(onClick = actionStartActivity<MainActivity>())
                     .padding(8.dp),
                 contentAlignment = Alignment.Center
@@ -42,10 +49,7 @@ class StreakWidget : GlanceAppWidget() {
                     Text(
                         text = "$days",
                         style = TextStyle(
-                            color = ColorProvider(
-                                day = Color.White,
-                                night = Color.White
-                            ),
+                            color = colors.onPrimary,
                             fontSize = 100.sp,
                             fontWeight = FontWeight.Bold,
                             fontFamily = FontFamily.Serif
@@ -57,15 +61,12 @@ class StreakWidget : GlanceAppWidget() {
                     Text(
                         text = "days since...",
                         style = TextStyle(
-                            color = ColorProvider(
-                                day = Color.White,
-                                night = Color.White
-                            ),
+                            color = colors.onPrimary,
                             fontSize = 14.sp
                         )
                     )
                 }
             }
-        }
+
     }
 }
