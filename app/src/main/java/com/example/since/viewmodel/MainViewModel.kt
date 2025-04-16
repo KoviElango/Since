@@ -60,7 +60,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         timerJob = viewModelScope.launch {
             while (true) {
                 _timer.value = StreakCalculator.getDetailedDurationSince(resetTime)
-                saveWidgetStreakToPrefs(_timer.value.days)
+                saveWidgetStreakToPrefs(resetTime)
                 delay(1000)
             }
         }
@@ -139,10 +139,10 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             loadRecentStreaks()
         }
     }
-    private fun saveWidgetStreakToPrefs(days: Long) {
+    private fun saveWidgetStreakToPrefs(resetTimestamp: Long) {
         val context = getApplication<Application>().applicationContext
         val prefs = context.getSharedPreferences("widget_prefs", Context.MODE_PRIVATE)
-        prefs.edit { putLong("streak_days", days) }
+        prefs.edit { putLong("resetTimestamp", resetTimestamp) }
 
         val manager = GlanceAppWidgetManager(context)
         viewModelScope.launch {
@@ -152,6 +152,4 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             }
         }
     }
-
-
 }

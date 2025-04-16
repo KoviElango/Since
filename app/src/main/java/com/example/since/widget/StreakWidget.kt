@@ -32,7 +32,8 @@ fun MyGlanceWidgetContent(context: Context) {
     GlanceTheme {
         val colors = GlanceTheme.colors
         val prefs = context.getSharedPreferences("widget_prefs", Context.MODE_PRIVATE)
-        val days = prefs.getLong("streak_days", 0L)
+        val resetTimestamp = prefs.getLong("resetTimestamp", 0L)
+        val days = ((System.currentTimeMillis() - resetTimestamp) / (1000 * 60 * 60 * 24))
 
             Box(
                 modifier = GlanceModifier
