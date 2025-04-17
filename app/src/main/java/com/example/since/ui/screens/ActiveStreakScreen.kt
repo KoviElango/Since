@@ -15,13 +15,14 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.unit.dp
 import com.example.since.ui.components.EditStreakDialog
-import com.example.since.ui.components.TimerBlock
 import com.example.since.viewmodel.MainViewModel
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.res.painterResource
 import com.example.since.R
+import com.example.since.ui.components.DayTimerBlock
+import com.example.since.ui.components.SubTimerBlock
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -83,24 +84,32 @@ fun ActiveStreakScreen(
                                 .semantics { contentDescription = "Timer showing your current streak duration" }
                         )
                         {
-                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                TimerBlock(
+
+
+
+                            Column(
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                verticalArrangement = Arrangement.Center,
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
+                                DayTimerBlock(
                                     value = timer.days,
-                                    label = "Days",
-                                    large = true
+                                    modifier = Modifier.size(180.dp)
                                 )
+
                                 Spacer(modifier = Modifier.height(16.dp))
 
                                 Row(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    horizontalArrangement = Arrangement.SpaceEvenly
+                                    horizontalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterHorizontally),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    modifier = Modifier
+                                        .wrapContentWidth()
                                 ) {
-                                    TimerBlock(value = timer.hours, label = "Hours")
-                                    TimerBlock(value = timer.minutes, label = "Minutes")
-                                    TimerBlock(value = timer.seconds, label = "Seconds")
+                                    SubTimerBlock(value = timer.hours, label = "Hrs", modifier = Modifier.size(56.dp))
+                                    SubTimerBlock(value = timer.minutes, label = "Min", modifier = Modifier.size(56.dp))
+                                    SubTimerBlock(value = timer.seconds, label = "Sec", modifier = Modifier.size(56.dp))
                                 }
                             }
-
                         }
                         HorizontalDivider(
                             modifier = Modifier
@@ -112,8 +121,8 @@ fun ActiveStreakScreen(
 
                         Text(
                             """
-                                “ You’ll never change your life until you change something you do daily. 
-                               The secret of your success is found in your daily routine. ”
+                                “If you don’t like something, change it. If you can’t change it, change your attitude.”
+                                               — Dr. Maya Angelou
                             """
                                 .trimIndent(),
                             fontStyle = FontStyle.Italic,
