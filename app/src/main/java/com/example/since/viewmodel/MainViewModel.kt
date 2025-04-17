@@ -76,7 +76,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                     dao.updateStreak(updated)
                     _activeStreak.value = updated
 
-                    // 🔥 Placeholder for future: Show "Congrats! New Personal Best" here
+                    // Placeholder: Show "Congrats! New Personal Best" here
                     // e.g. triggerToast("New Personal Best!") or set a state flag
                 }
 
