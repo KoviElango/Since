@@ -95,7 +95,7 @@ fun StreakCard(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     if (!isActive) {
-                        OutlinedButton(onClick = onStart, shape = RoundedCornerShape(12.dp),) {
+                        OutlinedButton(onClick = onStart, shape = RoundedCornerShape(12.dp)) {
                             Text("Start")
                         }
                     } else {

@@ -2,6 +2,7 @@ package com.example.since.viewmodel
 
 import android.app.Application
 import android.content.Context
+import androidx.core.content.edit
 import androidx.glance.appwidget.GlanceAppWidgetManager
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
@@ -15,7 +16,6 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
-import androidx.core.content.edit
 
 class MainViewModel(application: Application) : AndroidViewModel(application) {
 
@@ -30,6 +30,8 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     private val _activeStreak = MutableStateFlow<UserStreak?>(null)
     val activeStreak: StateFlow<UserStreak?> = _activeStreak.asStateFlow()
 
+    private val _personalBest = MutableStateFlow(0L)
+
     private var timerJob: Job? = null
 
     init {
@@ -40,6 +42,9 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         viewModelScope.launch {
             val recent = dao.getRecentStreaks()
             _streaks.value = recent
+
+            val best = recent.maxOfOrNull { it.personalBest } ?: 0L
+            _personalBest.value = best
 
             val active = dao.getActiveStreak()
             _activeStreak.value = active
@@ -59,8 +64,22 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
         timerJob = viewModelScope.launch {
             while (true) {
+                val now = System.currentTimeMillis()
+                val elapsed = now - resetTime
+
                 _timer.value = StreakCalculator.getDetailedDurationSince(resetTime)
                 saveWidgetStreakToPrefs(resetTime)
+
+                val current = _activeStreak.value
+                if (current != null && elapsed > current.personalBest) {
+                    val updated = current.copy(personalBest = elapsed)
+                    dao.updateStreak(updated)
+                    _activeStreak.value = updated
+
+                    // 🔥 Placeholder for future: Show "Congrats! New Personal Best" here
+                    // e.g. triggerToast("New Personal Best!") or set a state flag
+                }
+
                 delay(1000)
             }
         }
@@ -86,7 +105,6 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-
     fun deleteStreak(streak: UserStreak) {
         viewModelScope.launch {
             if (streak.isActive) return@launch
@@ -94,7 +112,6 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             loadRecentStreaks()
         }
     }
-
 
     fun resetStreak(current: UserStreak) {
         val currentTime = System.currentTimeMillis()
@@ -131,7 +148,6 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     fun setActiveStreak(streak: UserStreak) {
         viewModelScope.launch {
-
             dao.clearActiveStreak()
             val updated = streak.copy(
                 resetTimestamp = System.currentTimeMillis(),
@@ -141,6 +157,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             loadRecentStreaks()
         }
     }
+
     private fun saveWidgetStreakToPrefs(resetTimestamp: Long) {
         val context = getApplication<Application>().applicationContext
         val prefs = context.getSharedPreferences("widget_prefs", Context.MODE_PRIVATE)
