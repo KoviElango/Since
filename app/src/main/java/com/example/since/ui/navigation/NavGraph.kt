@@ -1,6 +1,7 @@
 package com.example.since.ui.navigation
 
-import androidx.compose.runtime.*
+import android.util.Log
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -13,27 +14,16 @@ import com.example.since.viewmodel.MainViewModel
 fun AppNavGraph(
     navController: NavHostController,
     viewModel: MainViewModel,
+    startDestination: String,
     modifier: Modifier = Modifier
 ) {
-    val activeStreak by viewModel.activeStreak.collectAsState()
-
-    var hasNavigated by remember { mutableStateOf(false) }
-
-    LaunchedEffect(activeStreak) {
-        if (activeStreak != null && !hasNavigated) {
-            navController.navigate(Screen.ActiveStreak.route) {
-                popUpTo(0) { inclusive = true }
-            }
-            hasNavigated = true
-        }
-    }
-
     NavHost(
         navController = navController,
-        startDestination = Screen.Lobby.route,
+        startDestination = startDestination,
         modifier = modifier
     ) {
         composable(Screen.Lobby.route) {
+            Log.d("NavGraph", "LobbyScreen composable rendered")
             LobbyScreen(
                 viewModel = viewModel,
                 onNavigateToActive = {
@@ -41,12 +31,15 @@ fun AppNavGraph(
                 }
             )
         }
+
         composable(Screen.ActiveStreak.route) {
+            Log.d("NavGraph", "ActiveStreakScreen composable rendered")
             ActiveStreakScreen(
                 viewModel = viewModel,
+                navController = navController,
                 onResetComplete = {
                     navController.navigate(Screen.Lobby.route) {
-                        popUpTo(Screen.ActiveStreak.route) { inclusive = true }
+                        popUpTo(0) { inclusive = true }
                     }
                 }
             )

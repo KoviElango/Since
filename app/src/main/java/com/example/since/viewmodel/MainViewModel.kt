@@ -89,10 +89,12 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     fun deleteStreak(streak: UserStreak) {
         viewModelScope.launch {
+            if (streak.isActive) return@launch
             dao.deleteStreak(streak)
             loadRecentStreaks()
         }
     }
+
 
     fun resetStreak(current: UserStreak) {
         val currentTime = System.currentTimeMillis()

@@ -18,7 +18,7 @@ fun DayTimerBlock(
         modifier = modifier,
         tonalElevation = 8.dp,
         shape = MaterialTheme.shapes.medium,
-        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.1f)
+        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.0f)
     ) {
         Column(
             modifier = Modifier

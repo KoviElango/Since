@@ -1,6 +1,5 @@
 package com.example.since.ui.screens
 
-import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
@@ -25,25 +24,38 @@ fun LobbyScreen(viewModel: MainViewModel, onNavigateToActive: () -> Unit) {
     val streaks by viewModel.streaks.collectAsState()
     var showForm by remember { mutableStateOf(false) }
     val context = LocalContext.current
+    val activeStreak by viewModel.activeStreak.collectAsState()
 
 
     Scaffold(
         topBar = {
             TopAppBar(
                 title = {
-                    Image(
-                        painter = painterResource(id = R.drawable.ic_launcher),
-                        contentDescription = "Since Logo",
-                        modifier = Modifier
-                            .height(120.dp)
-                    )
+                    Box (
+                        modifier = Modifier.fillMaxWidth(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Image(
+                            painter = painterResource(id = R.drawable.ic_launcher),
+                            contentDescription = "Since Logo",
+                            modifier = Modifier
+                                .height(120.dp)
+                        )
+                    }
                 }
             )
         },
         floatingActionButton = {
             FloatingActionButton(
                 onClick = {
-                    if (streaks.size < 3) {
+                    if (activeStreak != null) {
+                        Toast.makeText(
+                            context,
+                            "You’re already tracking a streak. Reset it before starting a new one.",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+                    else if (streaks.size < 3) {
                         showForm = true
                     } else {
                         Toast.makeText(
@@ -83,12 +95,37 @@ fun LobbyScreen(viewModel: MainViewModel, onNavigateToActive: () -> Unit) {
                                 clause = streak.resetClause,
                                 personalBest = streak.personalBest,
                                 resetTimestamp = streak.resetTimestamp,
+                                isActive = (streak.id == activeStreak?.id),
                                 onStart = {
-                                    Log.d("LobbyScreen", "Start button clicked for ${streak.name}")
-                                    viewModel.setActiveStreak(streak)
+                                    if (activeStreak != null) {
+                                        Toast.makeText(
+                                            context,
+                                            "You’re already tracking a streak. Reset it before starting a new one.",
+                                            Toast.LENGTH_SHORT
+                                        ).show()
+                                    } else {
+                                        viewModel.setActiveStreak(streak)
+                                        onNavigateToActive()
+                                    }
+                                },
+                                onDelete = {
+                                    if (activeStreak?.id == streak.id) {
+                                        Toast.makeText(
+                                            context,
+                                            "You can't delete an active streak. Please reset it first.",
+                                            Toast.LENGTH_SHORT
+                                        ).show()
+                                    } else {
+                                    viewModel.deleteStreak(streak)}
+                                           },
+                                onClick = {
                                     onNavigateToActive()
                                 },
-                                onDelete = { viewModel.deleteStreak(streak) }
+                                onResume = {
+                                    if (streak.isActive) {
+                                        onNavigateToActive()
+                                    }
+                                }
                             )
                         }
                     }

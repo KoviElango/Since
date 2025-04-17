@@ -34,14 +34,23 @@ fun StreakCard(
     personalBest: Long,
     resetTimestamp: Long,
     onStart: () -> Unit,
-    onDelete: () -> Unit
+    onDelete: () -> Unit,
+    isActive: Boolean = false,
+    onClick: () -> Unit,
+    onResume: () -> Unit = {},
 ) {
     val formattedDate = rememberFormattedDate(resetTimestamp)
 
-    val pastelGradient = Brush.linearGradient(
+    val inactiveGradient = Brush.linearGradient(
         colors = listOf(
-            Color(0xFF020824),
-            Color(0xFF185A72)
+            Color(0xFF040a22),
+            Color(0xFF8097f2)
+        )
+    )
+    val activeGradient = Brush.linearGradient(
+        colors = listOf(
+            Color(0xff0d1401),
+            Color(0xFF15a00c)
         )
     )
 
@@ -51,11 +60,13 @@ fun StreakCard(
             .padding(vertical = 10.dp),
         shape = RoundedCornerShape(16.dp),
         elevation = CardDefaults.cardElevation(4.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.Transparent)
     ) {
         Box(
             modifier = Modifier
-                .background(brush = pastelGradient, shape = RoundedCornerShape(16.dp))
+                .background(
+                    brush = if (isActive) activeGradient else inactiveGradient,
+                    shape = RoundedCornerShape(16.dp)
+                )
                 .fillMaxWidth()
                 .padding(5.dp)
         ) {
@@ -83,11 +94,22 @@ fun StreakCard(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    OutlinedButton(onClick = onStart, shape = RoundedCornerShape(12.dp)) {
-                        Text("Start")
+                    if (!isActive) {
+                        OutlinedButton(onClick = onStart, shape = RoundedCornerShape(12.dp),) {
+                            Text("Start")
+                        }
+                    } else {
+                        OutlinedButton(
+                            onClick = onResume,
+                            colors = ButtonDefaults.buttonColors(contentColor = Color(0xFF0d1401), containerColor = Color(0xFFCEF578)),
+                            shape = RoundedCornerShape(12.dp))
+                        {
+                            Text("Active")
+                        }
                     }
+
                     TextButton(onClick = onDelete) {
-                        Text("Delete", color = MaterialTheme.colorScheme.error)
+                        Text("Delete", color = Color.White)
                     }
                 }
             }
