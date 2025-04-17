@@ -22,6 +22,7 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.since.R
+import com.example.since.ui.components.ClaimAchievementDialog
 import com.example.since.ui.components.DayTimerBlock
 import com.example.since.ui.components.EditStreakDialog
 import com.example.since.ui.components.SubTimerBlock
@@ -39,6 +40,7 @@ fun ActiveStreakScreen(
     val timer by viewModel.timer.collectAsState()
     var showResetDialog by remember { mutableStateOf(false) }
     var showEditDialog by remember { mutableStateOf(false) }
+    var showClaimDialog by remember { mutableStateOf(false) }
 
     Scaffold(
         topBar = {
@@ -147,7 +149,21 @@ fun ActiveStreakScreen(
                             style = MaterialTheme.typography.bodyMedium
                         )
                     }
+                    Spacer(modifier = Modifier.height(8.dp))
 
+                    if (timer.days >= 0) {
+                        OutlinedButton(
+                            onClick = { showClaimDialog = true },
+                            colors = ButtonDefaults.outlinedButtonColors(
+                                containerColor = Color(0xFFFFC800),
+                                contentColor = Color.Black
+                            ),
+                        ) {
+                            Text("Claim")
+                        }
+
+                        Spacer(modifier = Modifier.height(8.dp))
+                    }
                     OutlinedButton(
                         onClick = { showResetDialog = true },
                         colors = ButtonDefaults.outlinedButtonColors(
@@ -221,4 +237,17 @@ fun ActiveStreakScreen(
             onDismiss = { showEditDialog = false }
         )
     }
+
+    if (showClaimDialog) {
+        ClaimAchievementDialog(
+            onDismiss = { showClaimDialog = false },
+            onConfirm = { message ->
+                viewModel.claimAchievement(activeStreak!!, message)
+                viewModel.resetStreak(activeStreak!!)
+                onResetComplete()
+                showClaimDialog = false
+            }
+        )
+    }
+
 }

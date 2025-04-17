@@ -3,15 +3,13 @@ package com.example.since.data
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 
-@Entity(tableName = "streaks")
-data class UserStreak(
+@Entity(tableName = "achievements")
+data class ClaimedAchievement(
     @PrimaryKey(autoGenerate = true) val id: Int = 0,
     val name: String,
     val resetClause: String,
-    val resetTimestamp: Long,
-    val personalBest: Long = 0L,
-    val isActive: Boolean = false
+    val datetimeClaimed: Long,
+    val streakLengthDays: Long,
+    val userMessage: String?,
+    val type: String = "habit"
 )
-
-
-

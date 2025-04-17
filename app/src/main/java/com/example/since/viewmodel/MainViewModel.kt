@@ -6,6 +6,8 @@ import androidx.core.content.edit
 import androidx.glance.appwidget.GlanceAppWidgetManager
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.since.data.AchievementDao
+import com.example.since.data.ClaimedAchievement
 import com.example.since.data.SinceDatabase
 import com.example.since.data.StreakDao
 import com.example.since.data.UserStreak
@@ -33,6 +35,9 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     private val _personalBest = MutableStateFlow(0L)
 
     private var timerJob: Job? = null
+
+    private val achievementDao: AchievementDao = SinceDatabase.getDatabase(application).achievementDao()
+
 
     init {
         loadRecentStreaks()
@@ -171,4 +176,19 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             }
         }
     }
+
+    fun claimAchievement(streak: UserStreak, message: String?) {
+        val claimed = ClaimedAchievement(
+            name = streak.name,
+            resetClause = streak.resetClause,
+            datetimeClaimed = System.currentTimeMillis(),
+            streakLengthDays = (System.currentTimeMillis() - streak.resetTimestamp) / (1000 * 60 * 60 * 24),
+            userMessage = message
+        )
+
+        viewModelScope.launch {
+            achievementDao.insertAchievement(claimed)
+        }
+    }
+
 }
