@@ -155,7 +155,7 @@ fun ActiveStreakScreen(
                         OutlinedButton(
                             onClick = { showClaimDialog = true },
                             colors = ButtonDefaults.outlinedButtonColors(
-                                containerColor = Color(0xFFFFC800),
+                                containerColor = Color(0xFFFF9900),
                                 contentColor = Color.Black
                             ),
                         ) {

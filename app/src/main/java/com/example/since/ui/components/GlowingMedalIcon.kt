@@ -37,7 +37,7 @@ fun GlowingMedalIcon() {
 
     Box(
         contentAlignment = Alignment.Center,
-        modifier = Modifier.size(90.dp)
+        modifier = Modifier.size(100.dp)
     ) {
         Box(
             modifier = Modifier
@@ -66,7 +66,7 @@ fun GlowingMedalIcon() {
             imageVector = Icons.Default.MilitaryTech,
             contentDescription = "Achievement Medal",
             tint = Color(0xFF002E69),
-            modifier = Modifier.size(58.dp)
+            modifier = Modifier.size(80.dp)
         )
     }
 }
