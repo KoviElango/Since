@@ -11,6 +11,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MilitaryTech
 import androidx.compose.material3.Icon
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -19,11 +20,16 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.*
 import androidx.compose.ui.graphics.asComposeRenderEffect
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.text.font.Font
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.example.since.R
 
-@RequiresApi(Build.VERSION_CODES.S)
 @Composable
-fun GlowingMedalIcon() {
+fun GlowingMedalIcon(
+    habitName: String? = null,
+) {
     val infiniteTransition = rememberInfiniteTransition()
     val blurRadius = 70f
     val glowAlpha by infiniteTransition.animateFloat(
@@ -34,6 +40,7 @@ fun GlowingMedalIcon() {
             repeatMode = RepeatMode.Reverse
         )
     )
+    val posterType = FontFamily(Font(R.font.outfit_regular))
 
     Box(
         contentAlignment = Alignment.Center,
@@ -61,12 +68,28 @@ fun GlowingMedalIcon() {
                     shape = CircleShape
                 )
         )
+Column (
+    horizontalAlignment = Alignment.CenterHorizontally,
+    verticalArrangement = Arrangement.Center
 
-        Icon(
-            imageVector = Icons.Default.MilitaryTech,
-            contentDescription = "Achievement Medal",
-            tint = Color(0xFF002E69),
-            modifier = Modifier.size(80.dp)
+){
+    Text( text = "$habitName",
+        style = androidx.compose.material3.MaterialTheme.typography.bodySmall,
+        color = Color(0xFF002E69),
+        fontFamily = posterType
         )
+    Icon(
+        imageVector = Icons.Default.MilitaryTech,
+        contentDescription = "Achievement Medal",
+        tint = Color(0xFF002E69),
+        modifier = Modifier.size(80.dp)
+    )
+}
     }
+}
+
+@Preview
+@Composable
+fun PreviewGlowingMedalIcon() {
+    GlowingMedalIcon(habitName = "No Distractions")
 }

@@ -27,6 +27,8 @@ import com.example.since.R
 
 @Composable
 fun ClaimAchievementDialog(
+    streakName: String? = null,
+    streakDays: Long? = null,
     onDismiss: () -> Unit,
     onConfirm: (String?) -> Unit
 ) {
@@ -111,7 +113,7 @@ fun ClaimAchievementDialog(
                                 letterSpacing = (-1.2).sp
                             )
                         ) {
-                            append("45 days!")
+                            append("$streakDays days!")
                         }
                     },
                     style = MaterialTheme.typography.titleLarge
@@ -120,7 +122,7 @@ fun ClaimAchievementDialog(
                 Spacer(modifier = Modifier.height(16.dp))
 
                 Text(
-                    text = "LONG ENOUGH TO REWIRE YOUR MIND AND BREAK THE HABIT.",
+                    text = "LONG ENOUGH TO REWIRE YOUR MIND AND BREAK THE HABIT:",
                     style = MaterialTheme.typography.bodyMedium.copy(
                         color = secondaryColor,
                         fontFamily = posterType
@@ -134,7 +136,9 @@ fun ClaimAchievementDialog(
             }
 
             //Achievement icon
-            GlowingMedalIcon()
+            GlowingMedalIcon(
+                habitName = streakName
+            )
 
             Column(
                 modifier = Modifier
@@ -202,14 +206,18 @@ fun ClaimAchievementDialog(
                     ),
                     border = BorderStroke(1.dp, secondaryColor)
                 ) {
-                    Text("Keep Going")
+                    Text("Keep Going",
+                        fontFamily = posterType)
                 }
 
                 Button(
                     onClick = { onConfirm(userMessage.takeIf { it.isNotBlank() }) },
                     colors = ButtonDefaults.buttonColors(containerColor = secondaryColor)
                 ) {
-                    Text("Claim Achievement", color = Color.White)
+                    Text("Claim Achievement",
+                        color = Color.White,
+                        fontFamily = posterType
+                    )
                 }
 
             }
@@ -226,6 +234,8 @@ fun ClaimAchievementDialog(
 fun PreviewClaimAchievementDialog() {
     MaterialTheme {
         ClaimAchievementDialog(
+            streakName = "No Distractions",
+            streakDays = 66,
             onDismiss = {},
             onConfirm = { /* Preview handler */ }
         )

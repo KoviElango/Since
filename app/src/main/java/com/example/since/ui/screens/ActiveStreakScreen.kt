@@ -151,7 +151,8 @@ fun ActiveStreakScreen(
                     }
                     Spacer(modifier = Modifier.height(8.dp))
 
-                    if (timer.days >= 0) {
+                    //App streak claim
+                    if (timer.days >= 45) {
                         OutlinedButton(
                             onClick = { showClaimDialog = true },
                             colors = ButtonDefaults.outlinedButtonColors(
@@ -240,6 +241,8 @@ fun ActiveStreakScreen(
 
     if (showClaimDialog) {
         ClaimAchievementDialog(
+            streakName = activeStreak?.name,
+            streakDays = timer.days,
             onDismiss = { showClaimDialog = false },
             onConfirm = { message ->
                 viewModel.claimAchievement(activeStreak!!, message)
@@ -249,5 +252,4 @@ fun ActiveStreakScreen(
             }
         )
     }
-
 }
