@@ -2,8 +2,6 @@ package com.example.since.ui.components
 
 import android.graphics.RenderEffect
 import android.graphics.Shader
-import android.os.Build
-import androidx.annotation.RequiresApi
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
