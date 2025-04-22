@@ -14,6 +14,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.*
 import androidx.compose.ui.graphics.asComposeRenderEffect
@@ -22,6 +23,7 @@ import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.example.since.R
 
 @Composable
@@ -42,11 +44,11 @@ fun GlowingMedalIcon(
 
     Box(
         contentAlignment = Alignment.Center,
-        modifier = Modifier.size(100.dp)
+        modifier = Modifier.size(120.dp)
     ) {
         Box(
             modifier = Modifier
-                .size(70.dp)
+                .size(80.dp)
                 .graphicsLayer {
                     alpha = glowAlpha
                     renderEffect = RenderEffect
@@ -71,17 +73,31 @@ Column (
     verticalArrangement = Arrangement.Center
 
 ){
-    Text( text = "$habitName",
-        style = androidx.compose.material3.MaterialTheme.typography.bodySmall,
-        color = Color(0xFF002E69),
-        fontFamily = posterType
-        )
     Icon(
         imageVector = Icons.Default.MilitaryTech,
         contentDescription = "Achievement Medal",
         tint = Color(0xFF002E69),
-        modifier = Modifier.size(80.dp)
+        modifier = Modifier.size(90.dp)
     )
+    Spacer(modifier = Modifier.height(8.dp))
+
+    Box(
+        Modifier
+            .size(95.dp)
+            .clip(CircleShape)
+            .background(Color.White.copy(alpha = 0.8f)),
+        contentAlignment = Alignment.Center
+    ){
+        Text( text = "$habitName",
+            style = androidx.compose.material3.MaterialTheme.typography.labelSmall,
+            letterSpacing = (-0.4).sp,
+            color = Color(0xFF002E69),
+            fontFamily = posterType,
+            fontStyle = androidx.compose.ui.text.font.FontStyle.Italic,
+            modifier = Modifier.padding(0.5.dp)
+        )
+    }
+
 }
     }
 }
