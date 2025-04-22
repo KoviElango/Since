@@ -13,12 +13,7 @@
 - Reset confirmation: You must confirm and reread your own reminder before resetting.
 - Minimalist UI with a dark theme and clean layout.
 - Optional widget support (planned).
-
----
-
-## Screenshots
-
-*Include screenshots here once available.*
+- Added a trophy archive for past achievements and claimed streaks
 
 ---
 
