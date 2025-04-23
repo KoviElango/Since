@@ -80,9 +80,6 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                     val updated = current.copy(personalBest = elapsed)
                     dao.updateStreak(updated)
                     _activeStreak.value = updated
-
-                    // Placeholder: Show "Congrats! New Personal Best" here
-                    // e.g. triggerToast("New Personal Best!") or set a state flag
                 }
 
                 delay(1000)
