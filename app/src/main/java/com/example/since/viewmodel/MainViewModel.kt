@@ -191,4 +191,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
+    fun getAchievements(): Flow<List<ClaimedAchievement>> {
+        return achievementDao.getAllAchievements()
+    }
 }

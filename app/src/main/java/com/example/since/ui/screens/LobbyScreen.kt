@@ -16,15 +16,22 @@ import com.example.since.ui.components.StreakCard
 import com.example.since.viewmodel.MainViewModel
 import android.widget.Toast
 import androidx.compose.ui.platform.LocalContext
+import com.example.since.ui.components.RewardCenterCard
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun LobbyScreen(viewModel: MainViewModel, onNavigateToActive: () -> Unit) {
+fun LobbyScreen(
+    viewModel: MainViewModel,
+    onNavigateToActive: () -> Unit,
+    onNavigateToAchievements: () -> Unit
+)
+ {
     val streaks by viewModel.streaks.collectAsState()
     var showForm by remember { mutableStateOf(false) }
     val context = LocalContext.current
     val activeStreak by viewModel.activeStreak.collectAsState()
+    val achievements by viewModel.getAchievements().collectAsState(initial = emptyList())
 
 
     Scaffold(
@@ -77,18 +84,27 @@ fun LobbyScreen(viewModel: MainViewModel, onNavigateToActive: () -> Unit) {
                 .padding(padding),
             contentAlignment = Alignment.Center
         ) {
+
+            Column(horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(horizontal = 16.dp)
+                    .padding(top = 32.dp),
+                verticalArrangement = Arrangement.spacedBy(20.dp))
+            {
+
+                RewardCenterCard(
+                    achievementCount = achievements.size,
+                    onClick = {
+                        onNavigateToAchievements()
+                    }
+                )
+
             if (streaks.isEmpty()) {
                 Text("No active streak. Add one to get started.")
             }
             else {
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(horizontal = 16.dp)
-                            .padding(top = 32.dp),
-                        verticalArrangement = Arrangement.spacedBy(20.dp)
-                    ) {
+                    Column {
                         streaks.forEach { streak ->
                             StreakCard(
                                 name = streak.name,

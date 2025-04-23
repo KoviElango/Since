@@ -10,6 +10,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import java.text.SimpleDateFormat
 import java.util.*
@@ -117,3 +118,39 @@ fun StreakCard(
     }
 }
 
+
+
+@Preview(showBackground = true)
+@Composable
+fun PreviewStreakCardInactive() {
+    MaterialTheme {
+        StreakCard(
+            name = "No Socials",
+            clause = "Avoid all social media apps.",
+            personalBest = 5 * 24 * 60 * 60 * 1000L, // 5 days in ms
+            resetTimestamp = System.currentTimeMillis() - 2 * 24 * 60 * 60 * 1000L,
+            isActive = false,
+            onStart = {},
+            onDelete = {},
+            onClick = {}
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun PreviewStreakCardActive() {
+    MaterialTheme {
+        StreakCard(
+            name = "Early Mornings",
+            clause = "Wake up by 6 AM daily.",
+            personalBest = 12 * 24 * 60 * 60 * 1000L, // 12 days in ms
+            resetTimestamp = System.currentTimeMillis() - 1 * 24 * 60 * 60 * 1000L,
+            isActive = true,
+            onStart = {},
+            onDelete = {},
+            onClick = {},
+            onResume = {}
+        )
+    }
+}
