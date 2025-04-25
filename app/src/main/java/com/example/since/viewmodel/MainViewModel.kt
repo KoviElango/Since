@@ -27,12 +27,28 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
+/**
+ * MainViewModel is the central state holder for the "Since" app.
+ *
+ * Bridges the presentation layer (UI) with the domain and data layers
+ * using use cases and repositories to maintain separation of concerns.
+ *
+ * Responsibilities:
+ * - Track habit streaks and timers
+ * - Manage achievements (trophy room)
+ * - Handle widget updates
+ *
+ * Architecture: Clean MVVM with UseCase delegation.
+ */
+
 class MainViewModel(application: Application) : AndroidViewModel(application) {
 
+
+    // --- Repositories ---
     private val streakRepository: StreakRepository = StreakRepositoryImpl(SinceDatabase.getDatabase(application).streakDao())
     private val achievementRepository: AchievementRepository = AchievementRepositoryImpl(SinceDatabase.getDatabase(application).achievementDao())
 
-
+    // --- UI State ---
     private val _streaks = MutableStateFlow<List<UserStreak>>(emptyList())
     val streaks: StateFlow<List<UserStreak>> = _streaks.asStateFlow()
 
@@ -46,6 +62,10 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     private var timerJob: Job? = null
 
+    // --- Streak Widget ---
+    private val saveStreakWidgetUseCase = SaveStreakWidgetUseCase(getApplication())
+
+    //UseCases for handling Streak logic (Lobby/Active screen)
     private val getRecentStreaksUseCase = GetRecentStreaksUseCase(streakRepository)
     private val calculatePersonalBestUseCase = CalculatePersonalBestUseCase()
     private val getActiveStreakUseCase = GetActiveStreakUseCase()
@@ -57,11 +77,13 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     private val deleteStreakUseCase = DeleteStreakUseCase(streakRepository)
 
     init {
-
         loadRecentStreaks()
     }
 
-
+    /**
+     * Load recent streaks from the repository and update local state.
+     * Also detects the active streak and starts the timer if needed.
+     */
     fun loadRecentStreaks() {
         viewModelScope.launch {
 
@@ -84,6 +106,10 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
+    /**
+     * Start the ticking timer coroutine that updates UI every second,
+     * recalculates duration, and updates widget & personal best if needed.
+     */
     fun startTickingTimer(resetTime: Long) {
         startStreakTimerUseCase.start(
             scope = viewModelScope,
@@ -100,6 +126,10 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         )
     }
 
+    /**
+     * Add a new streak or replace an old one (if 3 are already present).
+     * Clears any previous active streaks before insertion.
+     */
     fun addOrReplaceStreak(newStreak: UserStreak) {
         viewModelScope.launch {
             streakRepository.clearActiveStreak()
@@ -115,6 +145,9 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
+    /**
+     * Deletes a streak if it's not currently active.
+     */
     fun deleteStreak(streak: UserStreak) {
         viewModelScope.launch {
             val deleted = deleteStreakUseCase(streak)
@@ -124,6 +157,10 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
+    /**
+     * Resets a given streak, updates the personal best if needed,
+     * and cancels the timer job.
+     */
     fun resetStreak(current: UserStreak) {
         val updated = resetStreakUseCase(current, System.currentTimeMillis())
 
@@ -138,6 +175,10 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
+    /**
+     * Update the name and reset clause for a given streak by ID.
+     * This also refreshes the recent streak list and UI state.
+     */
     fun updateStreakDetails(id: Int, name: String, clause: String) {
         viewModelScope.launch {
             val updated = updateStreakDetailsUseCase(id, name, clause)
@@ -148,6 +189,10 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
+    /**
+     * Marks a streak as active, resets the timestamp,
+     * and loads it into the active state.
+     */
     fun setActiveStreak(streak: UserStreak) {
         viewModelScope.launch {
             setActiveStreakUseCase(streak)
@@ -155,24 +200,25 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    /*
-    Functions related to Streak Widget
-     */
-    private val saveStreakWidgetUseCase = SaveStreakWidgetUseCase(getApplication())
-
-    /*
-    Functions related to Trophy Room - Achievement
-     */
+    //Functions related to Trophy Room - Achievement
 
     private val claimAchievementUseCase = ClaimAchievementUseCase(achievementRepository)
     private val getAchievementsUseCase = GetAchievementsUseCase(achievementRepository)
 
+    /**
+     * Claims an achievement from the given streak and optional reflection.
+     * Saves it to the Trophy Room for viewing later.
+     */
     fun claimAchievement(streak: UserStreak, message: String?) {
         viewModelScope.launch {
             claimAchievementUseCase(streak, message)
         }
     }
 
+    /**
+     * Retrieves all achievements (claimed streaks) from repository.
+     * Exposed as a Flow for reactive UI display.
+     */
     fun getAchievements(): Flow<List<ClaimedAchievement>> {
         return getAchievementsUseCase()
     }
