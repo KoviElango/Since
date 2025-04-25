@@ -19,6 +19,16 @@ import androidx.compose.ui.platform.LocalContext
 import com.example.since.ui.components.RewardCenterCard
 
 
+/**
+ * LobbyScreen is the main dashboard where users can view and manage their current streaks.
+ *
+ * It shows a list of tracked habits, allows starting or resetting a streak,
+ * and provides access to the Reward Centre.
+ *
+ * @param viewModel The shared MainViewModel managing streak state and logic.
+ * @param onNavigateToActive Callback to navigate to the active streak screen.
+ */
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LobbyScreen(

@@ -6,6 +6,11 @@ import androidx.room.Query
 import com.example.since.data.ClaimedAchievement
 import kotlinx.coroutines.flow.Flow
 
+/**
+ * DAO interface for managing claimed achievements in the Room database.
+ *
+ * Provides methods for inserting and querying [ClaimedAchievement] entries.
+ */
 @Dao
 interface AchievementDao {
 

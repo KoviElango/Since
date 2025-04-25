@@ -7,6 +7,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 
+
+/**
+ * AddStreakScreen allows users to input a new streak name and its reset clause.
+ *
+ * Typically shown as a dialog or overlay, it's invoked when the user wants to begin tracking a new habit.
+ *
+ * @param onSubmit Callback triggered with the new streak name and reset clause.
+ * @param onDismiss Callback to dismiss the screen without submitting.
+ */
+
 @Composable
 fun AddStreakScreen(
     onSubmit: (streakName: String, resetClause: String) -> Unit,

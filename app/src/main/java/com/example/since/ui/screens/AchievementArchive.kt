@@ -23,6 +23,14 @@ import com.example.since.ui.components.AchievementDetailDialog
 import com.example.since.ui.components.GlowingMedalIcon
 import com.example.since.viewmodel.MainViewModel
 
+/**
+ * AchievementArchiveScreen fetches and displays all claimed achievements from the ViewModel.
+ *
+ * Serves as a container that handles state observation and passes data
+ * to [AchievementArchiveContent] for rendering.
+ *
+ * @param viewModel MainViewModel providing access to claimed achievements.
+ */
 
 @Composable
 fun AchievementArchiveScreen(viewModel: MainViewModel) {
@@ -30,6 +38,15 @@ fun AchievementArchiveScreen(viewModel: MainViewModel) {
     AchievementArchiveContent(achievements = achievements)
 }
 
+
+/**
+ * AchievementArchiveContent renders the achievement medals in a grid-like layout.
+ *
+ * It displays achievements in rows of three and handles selection of a medal
+ * to show additional details via a dialog.
+ *
+ * @param achievements The list of claimed achievements to display.
+ */
 @Composable
 fun AchievementArchiveContent(achievements: List<ClaimedAchievement>) {
     val posterType = FontFamily(Font(R.font.outfit_regular))

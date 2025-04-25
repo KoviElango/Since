@@ -29,6 +29,15 @@ import com.example.since.ui.components.SubTimerBlock
 import com.example.since.ui.navigation.Screen
 import com.example.since.viewmodel.MainViewModel
 
+/**
+ * ActiveStreakScreen displays the currently active streak with a live timer,
+ * and provides actions like edit, reset, or claim achievement.
+ *
+ * @param viewModel The shared MainViewModel that holds active streak state and timer logic.
+ * @param navController Used for navigation control (e.g., back press).
+ * @param onResetComplete Callback when the user resets the streak successfully.
+ */
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ActiveStreakScreen(

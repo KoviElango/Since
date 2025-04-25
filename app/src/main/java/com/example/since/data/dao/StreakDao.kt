@@ -3,6 +3,11 @@ package com.example.since.data.dao
 import androidx.room.*
 import com.example.since.data.UserStreak
 
+/**
+ * DAO interface for accessing and managing habit streaks in the Room database.
+ *
+ * Provides insert, update, delete, and query operations for the [UserStreak] entity.
+ */
 @Dao
 interface StreakDao {
 

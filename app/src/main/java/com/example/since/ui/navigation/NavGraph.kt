@@ -10,6 +10,17 @@ import com.example.since.ui.screens.ActiveStreakScreen
 import com.example.since.ui.screens.LobbyScreen
 import com.example.since.viewmodel.MainViewModel
 
+/**
+ * AppNavGraph sets up navigation routes and links composable screens using the provided NavController.
+ *
+ * It acts as the central navigation graph for the application and defines screen transitions.
+ *
+ * @param navController The NavHostController that manages navigation state and backstack.
+ * @param viewModel Shared MainViewModel for passing data/state to screens.
+ * @param startDestination The initial screen route when the app launches.
+ * @param modifier Optional modifier to apply to the NavHost.
+ */
+
 @Composable
 fun AppNavGraph(
     navController: NavHostController,

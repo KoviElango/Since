@@ -7,6 +7,11 @@ import androidx.sqlite.db.SupportSQLiteDatabase
 import com.example.since.data.dao.AchievementDao
 import com.example.since.data.dao.StreakDao
 
+/**
+ * The Room database for the Since app, responsible for storing streaks and achievements.
+ *
+ * Provides access to DAOs and handles schema migration logic.
+ */
 @Database(
     entities = [UserStreak::class, ClaimedAchievement::class],
     version = 2,

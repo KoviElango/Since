@@ -60,6 +60,7 @@ dependencies {
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
+    implementation(libs.androidx.room.external.antlr)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -95,4 +96,11 @@ dependencies {
     implementation("androidx.glance:glance-appwidget:1.1.1")
     implementation("androidx.glance:glance-material3:1.1.1")
     implementation ("androidx.glance:glance-material:1.1.1")
+
+    // Unit Test libraries
+    testImplementation ("junit:junit:4.13.2")
+    testImplementation ("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.7.3")
+    testImplementation ("org.mockito:mockito-core:4.11.0")
+    testImplementation ("app.cash.turbine:turbine:0.12.1")
+    testImplementation(kotlin("test"))
 }
