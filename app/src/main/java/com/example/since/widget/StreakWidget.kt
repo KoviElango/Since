@@ -18,6 +18,7 @@ import androidx.glance.text.FontFamily
 import androidx.glance.background
 import com.example.since.MainActivity
 import androidx.glance.GlanceTheme
+import com.example.since.data.repository.WidgetRepositoryImpl
 
 class StreakWidget : GlanceAppWidget() {
     override suspend fun provideGlance(context: Context, id: GlanceId) {
@@ -31,8 +32,8 @@ class StreakWidget : GlanceAppWidget() {
 fun MyGlanceWidgetContent(context: Context) {
     GlanceTheme {
         val colors = GlanceTheme.colors
-        val prefs = context.getSharedPreferences("widget_prefs", Context.MODE_PRIVATE)
-        val resetTimestamp = prefs.getLong("resetTimestamp", 0L)
+        val widgetRepository = WidgetRepositoryImpl(context)
+        val resetTimestamp = widgetRepository.getResetTimestamp()
         val days = ((System.currentTimeMillis() - resetTimestamp) / (1000 * 60 * 60 * 24))
 
             Box(
@@ -59,13 +60,23 @@ fun MyGlanceWidgetContent(context: Context) {
 
                     Spacer(modifier = GlanceModifier.width(8.dp))
 
-                    Text(
-                        text = "days since...",
-                        style = TextStyle(
-                            color = colors.onPrimary,
-                            fontSize = 14.sp
+                    if (days == 1L) {
+                        Text(
+                            text = "day since...",
+                            style = TextStyle(
+                                color = colors.onPrimary,
+                                fontSize = 14.sp)
                         )
-                    )
+                    }
+                    else {
+                        Text(
+                            text = "days since...",
+                            style = TextStyle(
+                                color = colors.onPrimary,
+                                fontSize = 14.sp
+                            )
+                        )
+                    }
                 }
             }
 

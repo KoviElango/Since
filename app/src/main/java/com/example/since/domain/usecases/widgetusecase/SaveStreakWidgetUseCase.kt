@@ -1,19 +1,19 @@
 package com.example.since.domain.usecases.widgetusecase
 
 import android.content.Context
-import androidx.core.content.edit
 import androidx.glance.appwidget.GlanceAppWidgetManager
+import com.example.since.data.repository.WidgetRepository
 import com.example.since.widget.StreakWidget
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 class SaveStreakWidgetUseCase(
-    private val context: Context
+    private val context: Context,
+    private val widgetRepository: WidgetRepository
 ) {
     operator fun invoke(resetTimestamp: Long) {
-        val prefs = context.getSharedPreferences("widget_prefs", Context.MODE_PRIVATE)
-        prefs.edit { putLong("resetTimestamp", resetTimestamp) }
+        widgetRepository.saveResetTimestamp(resetTimestamp)
 
         val manager = GlanceAppWidgetManager(context)
         CoroutineScope(Dispatchers.IO).launch {

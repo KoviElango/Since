@@ -10,6 +10,7 @@ import com.example.since.data.repository.AchievementRepository
 import com.example.since.data.repository.AchievementRepositoryImpl
 import com.example.since.data.repository.StreakRepository
 import com.example.since.data.repository.StreakRepositoryImpl
+import com.example.since.data.repository.WidgetRepositoryImpl
 import com.example.since.domain.usecases.primaryusecase.AddOrReplaceStreakUseCase
 import com.example.since.domain.usecases.primaryusecase.CalculatePersonalBestUseCase
 import com.example.since.domain.usecases.primaryusecase.DeleteStreakUseCase
@@ -63,7 +64,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     private var timerJob: Job? = null
 
     // --- Streak Widget ---
-    private val saveStreakWidgetUseCase = SaveStreakWidgetUseCase(getApplication())
+    private val saveStreakWidgetUseCase = SaveStreakWidgetUseCase(getApplication(),WidgetRepositoryImpl(getApplication()))
 
     //UseCases for handling Streak logic (Lobby/Active screen)
     private val getRecentStreaksUseCase = GetRecentStreaksUseCase(streakRepository)
