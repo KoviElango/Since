@@ -97,10 +97,4 @@ dependencies {
     implementation("androidx.glance:glance-material3:1.1.1")
     implementation ("androidx.glance:glance-material:1.1.1")
 
-    // Unit Test libraries
-    testImplementation ("junit:junit:4.13.2")
-    testImplementation ("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.7.3")
-    testImplementation ("org.mockito:mockito-core:4.11.0")
-    testImplementation ("app.cash.turbine:turbine:0.12.1")
-    testImplementation(kotlin("test"))
 }
