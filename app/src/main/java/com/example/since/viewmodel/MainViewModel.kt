@@ -1,27 +1,37 @@
 package com.example.since.viewmodel
 
 import android.app.Application
-import android.content.Context
-import androidx.core.content.edit
-import androidx.glance.appwidget.GlanceAppWidgetManager
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.since.data.AchievementDao
 import com.example.since.data.ClaimedAchievement
 import com.example.since.data.SinceDatabase
-import com.example.since.data.StreakDao
 import com.example.since.data.UserStreak
-import com.example.since.model.StreakCalculator
+import com.example.since.data.repository.AchievementRepository
+import com.example.since.data.repository.AchievementRepositoryImpl
+import com.example.since.data.repository.StreakRepository
+import com.example.since.data.repository.StreakRepositoryImpl
+import com.example.since.domain.usecases.primaryusecase.AddOrReplaceStreakUseCase
+import com.example.since.domain.usecases.primaryusecase.CalculatePersonalBestUseCase
+import com.example.since.domain.usecases.primaryusecase.DeleteStreakUseCase
+import com.example.since.domain.usecases.primaryusecase.GetActiveStreakUseCase
+import com.example.since.domain.usecases.primaryusecase.GetRecentStreaksUseCase
+import com.example.since.domain.usecases.primaryusecase.ResetStreakUseCase
+import com.example.since.domain.usecases.primaryusecase.SetActiveStreakUseCase
+import com.example.since.domain.usecases.primaryusecase.StartStreakTimerUseCase
+import com.example.since.domain.usecases.primaryusecase.UpdateStreakDetailsUseCase
+import com.example.since.domain.usecases.trophyusecases.ClaimAchievementUseCase
+import com.example.since.domain.usecases.trophyusecases.GetAchievementsUseCase
+import com.example.since.domain.usecases.widgetusecase.SaveStreakWidgetUseCase
 import com.example.since.model.StreakDuration
-import com.example.since.widget.StreakWidget
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
 class MainViewModel(application: Application) : AndroidViewModel(application) {
 
-    private val dao: StreakDao = SinceDatabase.getDatabase(application).streakDao()
+    private val streakRepository: StreakRepository = StreakRepositoryImpl(SinceDatabase.getDatabase(application).streakDao())
+    private val achievementRepository: AchievementRepository = AchievementRepositoryImpl(SinceDatabase.getDatabase(application).achievementDao())
+
 
     private val _streaks = MutableStateFlow<List<UserStreak>>(emptyList())
     val streaks: StateFlow<List<UserStreak>> = _streaks.asStateFlow()
@@ -36,22 +46,32 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     private var timerJob: Job? = null
 
-    private val achievementDao: AchievementDao = SinceDatabase.getDatabase(application).achievementDao()
-
+    private val getRecentStreaksUseCase = GetRecentStreaksUseCase(streakRepository)
+    private val calculatePersonalBestUseCase = CalculatePersonalBestUseCase()
+    private val getActiveStreakUseCase = GetActiveStreakUseCase()
+    private val resetStreakUseCase = ResetStreakUseCase()
+    private val addOrReplaceStreakUseCase = AddOrReplaceStreakUseCase()
+    private val startStreakTimerUseCase = StartStreakTimerUseCase()
+    private val setActiveStreakUseCase = SetActiveStreakUseCase(streakRepository)
+    private val updateStreakDetailsUseCase = UpdateStreakDetailsUseCase(streakRepository)
+    private val deleteStreakUseCase = DeleteStreakUseCase(streakRepository)
 
     init {
+
         loadRecentStreaks()
     }
 
+
     fun loadRecentStreaks() {
         viewModelScope.launch {
-            val recent = dao.getRecentStreaks()
+
+            val recent = getRecentStreaksUseCase()
             _streaks.value = recent
 
-            val best = recent.maxOfOrNull { it.personalBest } ?: 0L
+            val best = calculatePersonalBestUseCase(recent)
             _personalBest.value = best
 
-            val active = dao.getActiveStreak()
+            val active = getActiveStreakUseCase(recent)
             _activeStreak.value = active
 
             timerJob?.cancel()
@@ -65,83 +85,63 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun startTickingTimer(resetTime: Long) {
-        timerJob?.cancel()
-
-        timerJob = viewModelScope.launch {
-            while (true) {
-                val now = System.currentTimeMillis()
-                val elapsed = now - resetTime
-
-                _timer.value = StreakCalculator.getDetailedDurationSince(resetTime)
-                saveWidgetStreakToPrefs(resetTime)
-
-                val current = _activeStreak.value
-                if (current != null && elapsed > current.personalBest) {
-                    val updated = current.copy(personalBest = elapsed)
-                    dao.updateStreak(updated)
-                    _activeStreak.value = updated
+        startStreakTimerUseCase.start(
+            scope = viewModelScope,
+            resetTime = resetTime,
+            currentStreakProvider = { _activeStreak.value },
+            onTimerUpdate = { _timer.value = it },
+            onStreakUpdated = {
+                viewModelScope.launch {
+                    streakRepository.updateStreak(it)
+                    _activeStreak.value = it
                 }
-
-                delay(1000)
-            }
-        }
+            },
+            onTick = { saveStreakWidgetUseCase(resetTime) }
+        )
     }
 
     fun addOrReplaceStreak(newStreak: UserStreak) {
         viewModelScope.launch {
-            dao.clearActiveStreak()
-            val existing = dao.getRecentStreaks()
-            val newActive = newStreak.copy(isActive = true)
+            streakRepository.clearActiveStreak()
+            val existing = streakRepository.getRecentStreaks()
+            val result = addOrReplaceStreakUseCase(newStreak, existing)
 
             if (existing.size < 3) {
-                dao.insertStreak(newActive)
+                streakRepository.insertStreak(result)
             } else {
-                val oldest = existing.minByOrNull { it.resetTimestamp }
-                if (oldest != null) {
-                    val updated = newActive.copy(id = oldest.id)
-                    dao.updateStreak(updated)
-                }
+                streakRepository.updateStreak(result)
             }
-
             loadRecentStreaks()
         }
     }
 
     fun deleteStreak(streak: UserStreak) {
         viewModelScope.launch {
-            if (streak.isActive) return@launch
-            dao.deleteStreak(streak)
-            loadRecentStreaks()
+            val deleted = deleteStreakUseCase(streak)
+            if (deleted) {
+                loadRecentStreaks()
+            }
         }
     }
 
     fun resetStreak(current: UserStreak) {
-        val currentTime = System.currentTimeMillis()
-        val elapsed = currentTime - current.resetTimestamp
-
-        val updated = current.copy(
-            resetTimestamp = currentTime,
-            personalBest = maxOf(current.personalBest, elapsed),
-            isActive = false
-        )
+        val updated = resetStreakUseCase(current, System.currentTimeMillis())
 
         viewModelScope.launch {
-            dao.updateStreak(updated)
-
+            streakRepository.updateStreak(updated)
             _activeStreak.value = null
-            timerJob?.cancel()
+            startStreakTimerUseCase.stop()
             _timer.value = StreakDuration(0, 0, 0, 0)
 
             loadRecentStreaks()
+
         }
     }
 
     fun updateStreakDetails(id: Int, name: String, clause: String) {
         viewModelScope.launch {
-            val current = dao.getStreakById(id)
-            if (current != null) {
-                val updated = current.copy(name = name, resetClause = clause)
-                dao.updateStreak(updated)
+            val updated = updateStreakDetailsUseCase(id, name, clause)
+            if (updated != null) {
                 _activeStreak.value = updated
                 loadRecentStreaks()
             }
@@ -150,45 +150,30 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     fun setActiveStreak(streak: UserStreak) {
         viewModelScope.launch {
-            dao.clearActiveStreak()
-            val updated = streak.copy(
-                resetTimestamp = System.currentTimeMillis(),
-                isActive = true
-            )
-            dao.updateStreak(updated)
+            setActiveStreakUseCase(streak)
             loadRecentStreaks()
         }
     }
 
-    private fun saveWidgetStreakToPrefs(resetTimestamp: Long) {
-        val context = getApplication<Application>().applicationContext
-        val prefs = context.getSharedPreferences("widget_prefs", Context.MODE_PRIVATE)
-        prefs.edit { putLong("resetTimestamp", resetTimestamp) }
+    /*
+    Functions related to Streak Widget
+     */
+    private val saveStreakWidgetUseCase = SaveStreakWidgetUseCase(getApplication())
 
-        val manager = GlanceAppWidgetManager(context)
-        viewModelScope.launch {
-            val ids = manager.getGlanceIds(StreakWidget::class.java)
-            ids.forEach { id ->
-                StreakWidget().update(context, id)
-            }
-        }
-    }
+    /*
+    Functions related to Trophy Room - Achievement
+     */
+
+    private val claimAchievementUseCase = ClaimAchievementUseCase(achievementRepository)
+    private val getAchievementsUseCase = GetAchievementsUseCase(achievementRepository)
 
     fun claimAchievement(streak: UserStreak, message: String?) {
-        val claimed = ClaimedAchievement(
-            name = streak.name,
-            resetClause = streak.resetClause,
-            datetimeClaimed = System.currentTimeMillis(),
-            streakLengthDays = (System.currentTimeMillis() - streak.resetTimestamp) / (1000 * 60 * 60 * 24),
-            userMessage = message
-        )
-
         viewModelScope.launch {
-            achievementDao.insertAchievement(claimed)
+            claimAchievementUseCase(streak, message)
         }
     }
 
     fun getAchievements(): Flow<List<ClaimedAchievement>> {
-        return achievementDao.getAllAchievements()
+        return getAchievementsUseCase()
     }
 }

@@ -1,6 +1,7 @@
-package com.example.since.data
+package com.example.since.data.dao
 
 import androidx.room.*
+import com.example.since.data.UserStreak
 
 @Dao
 interface StreakDao {

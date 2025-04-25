@@ -4,6 +4,8 @@ import android.content.Context
 import androidx.room.*
 import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
+import com.example.since.data.dao.AchievementDao
+import com.example.since.data.dao.StreakDao
 
 @Database(
     entities = [UserStreak::class, ClaimedAchievement::class],

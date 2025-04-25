@@ -1,8 +1,9 @@
-package com.example.since.data
+package com.example.since.data.dao
 
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
+import com.example.since.data.ClaimedAchievement
 import kotlinx.coroutines.flow.Flow
 
 @Dao
