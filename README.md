@@ -76,3 +76,156 @@
 - [ ] ML system to predict habit completion
 
 ---
+
+
+
+---
+
+# Since - Technical Documentation
+> _Version: 1.2.2_ 
+> _Last Updated: 2025-04-25_  
+> _Author: Koovendhan Elango_  
+
+---
+
+## 1. Overview
+
+**Since** is a minimalist, offline-first Android app built to **track behavioral streaks** for habit-breaking and self-discipline reinforcement.  
+It enables users to **start**, **pause**, and **reset** streaks while recording **personal bests** and **claiming achievements**.
+
+The architecture emphasizes **Clean Architecture principles**, **scalability**, and **testability**, while maintaining **high code readability** and **MVVM** separation.
+
+---
+
+## 2. Architecture
+
+| Layer | Responsibility |
+|:-----|:----------------|
+| Presentation Layer | Compose UI Screens, ViewModels managing UI state |
+| Domain Layer | Business logic encapsulated in UseCases |
+| Data Layer | Repositories abstracting Room database access |
+| Data Source | Room DAOs for persistence |
+
+---
+
+## 3. Major Components
+
+### 3.1 Presentation Layer
+- **Jetpack Compose** for UI: Fully declarative, with Material3 design system.
+- **Single Activity** architecture using `Compose Navigation`.
+- **ViewModel** (AndroidViewModel) managing screen states via **StateFlow**.
+- **Screen Breakdown**:
+  - `LobbyScreen` – Manage multiple streaks (max 3)
+  - `ActiveStreakScreen` – Track the currently active streak
+  - `AchievementArchiveScreen` – View past claimed achievements (Trophy Room)
+
+### 3.2 Domain Layer
+- **UseCases** separate business rules from ViewModels:
+  - Example: `ResetStreakUseCase`, `GetAchievementsUseCase`, `AddOrReplaceStreakUseCase`, etc.
+- Each UseCase **performs one responsibility** and is **unit-testable**.
+
+### 3.3 Data Layer
+- **Repository Pattern** decouples ViewModel from DAO/database.
+- **Interfaces** (`StreakRepository`, `AchievementRepository`) ensure loose coupling.
+- **Implementations** (`StreakRepositoryImpl`, `AchievementRepositoryImpl`) connect to Room DAOs.
+
+### 3.4 Data Source
+- **Room Database** with two entities:
+  - `UserStreak` (active/past streaks)
+  - `ClaimedAchievement` (archived achievements)
+- **Migrations** are supported (v1 → v2).
+
+---
+
+## 4. Data Models
+
+| Model | Purpose |
+|:------|:--------|
+| `UserStreak` | Represents an ongoing or completed streak (habit name, reset clause, timestamps, personal best) |
+| `ClaimedAchievement` | Represents a finalized achievement from a streak |
+
+---
+
+## 5. Tech Stack
+
+| Area | Technology |
+|:-----|:-----------|
+| Language | Kotlin |
+| UI | Jetpack Compose, Material3 |
+| State Management | StateFlow, ViewModel |
+| Database | Room Persistence Library |
+| Navigation | Jetpack Compose Navigation |
+| Background Tasks | CoroutineScope, ViewModelScope |
+| Widget | Glance AppWidget for Home Screen widgets |
+| Testing | JUnit5, Coroutine Test Library, Mocked Repositories |
+
+---
+
+## 6. Dependency Overview
+
+- `Room`
+- `Compose BOM`
+- `Glance (for Widgets)`
+- `Kotlinx.coroutines`
+- `ViewModel / LiveData / Lifecycle-runtime`
+- `JUnit / CoroutineTest`
+- (Optional Future) `WorkManager` for scheduled updates
+
+---
+
+## 7. Special Features
+
+| Feature | Description |
+|:--------|:------------|
+| Live Timer | Updates every second with a clean ticker using CoroutineScope |
+| Personal Best Tracking | Tracks user's longest successful streak |
+| Reminder/Reflection Storage | Reminds users of why they started before reset |
+| Trophy Archive | Reward center with all earned achievements |
+| Offline First | No network permissions required, 100% offline safe |
+| Dynamic Widget | Streak timer available directly on the home screen |
+
+---
+
+## 8. Testing Strategy
+
+| Target | Testing Approach |
+|:-------|:-----------------|
+| ViewModels | Unit tests with Fake Repositories |
+| UseCases | Pure Unit tests |
+| Widgets | Snapshot testing (future work) |
+| DAO | Room Instrumentation tests (future work) |
+
+- Mocked Repositories available under `testdata/`
+- Clean separation allows easy fake injection without touching production code.
+- Coroutine Dispatchers are managed using `runTest` during unit tests.
+
+---
+
+## 9. Future Improvements
+
+- Move Widget updates into `WorkManager` for periodic refresh instead of manual updates.
+- Expand Trophy Room (categories: Habit, Focus, Health)
+- Allow users to archive more than 3 streaks
+- Dark Mode support for widgets
+- In-app achievements (not just post-streak)
+
+---
+
+## 10. Project Philosophy
+
+- **Minimalism**: Only necessary features, no bloat.
+- **Clarity First**: Code should be easy for future developers to maintain and extend.
+- **Offline First**: Prioritize local storage and privacy.
+- **Scalable Design**: Architecture capable of adding remote sync or advanced features without rewriting the core.
+
+---
+
+# Notes for Developers
+
+- Follow the UseCase -> Repository -> DAO flow for any new features.
+- Prefer `StateFlow` over `LiveData` unless explicitly necessary.
+- Avoid direct DAO access inside the ViewModel or UI layer.
+- Keep screen-specific states inside the ViewModel, and global app states separated if scaling bigger.
+- Follow clean commit messages and PR standards.
+
+---
