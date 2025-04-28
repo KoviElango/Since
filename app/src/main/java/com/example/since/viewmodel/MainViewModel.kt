@@ -64,7 +64,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     private var timerJob: Job? = null
 
     // --- Streak Widget ---
-    private val saveStreakWidgetUseCase = SaveStreakWidgetUseCase(getApplication(),WidgetRepositoryImpl(getApplication()))
+    private val saveStreakWidgetUseCase = SaveStreakWidgetUseCase(WidgetRepositoryImpl(getApplication()))
 
     //UseCases for handling Streak logic (Lobby/Active screen)
     private val getRecentStreaksUseCase = GetRecentStreaksUseCase(streakRepository)
@@ -112,20 +112,25 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
      * recalculates duration, and updates widget & personal best if needed.
      */
     fun startTickingTimer(resetTime: Long) {
-        startStreakTimerUseCase.start(
-            scope = viewModelScope,
-            resetTime = resetTime,
-            currentStreakProvider = { _activeStreak.value },
-            onTimerUpdate = { _timer.value = it },
-            onStreakUpdated = {
-                viewModelScope.launch {
-                    streakRepository.updateStreak(it)
-                    _activeStreak.value = it
-                }
-            },
-            onTick = { saveStreakWidgetUseCase(resetTime) }
-        )
+        viewModelScope.launch {
+
+            updateWidget(resetTime, true)
+            startStreakTimerUseCase.start(
+                scope = viewModelScope,
+                resetTime = resetTime,
+                currentStreakProvider = { _activeStreak.value },
+                onTimerUpdate = { _timer.value = it },
+                onStreakUpdated = {
+                    viewModelScope.launch {
+                        streakRepository.updateStreak(it)
+                        _activeStreak.value = it
+                    }
+                },
+                onTick = { }
+            )
+        }
     }
+
 
     /**
      * Add a new streak or replace an old one (if 3 are already present).
@@ -171,6 +176,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             startStreakTimerUseCase.stop()
             _timer.value = StreakDuration(0, 0, 0, 0)
 
+            updateWidget(updated.resetTimestamp, false)
             loadRecentStreaks()
 
         }
@@ -197,7 +203,15 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     fun setActiveStreak(streak: UserStreak) {
         viewModelScope.launch {
             setActiveStreakUseCase(streak)
+            updateWidget(streak.resetTimestamp, true)
             loadRecentStreaks()
+        }
+    }
+
+    //Helper function to update the widget in the background.
+        private fun updateWidget(resetTimestamp: Long, isActive: Boolean) {
+        viewModelScope.launch {
+            saveStreakWidgetUseCase(resetTimestamp, isActive)
         }
     }
 

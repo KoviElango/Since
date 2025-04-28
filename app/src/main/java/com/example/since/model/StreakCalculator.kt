@@ -15,8 +15,4 @@ object StreakCalculator {
 
         return StreakDuration(days, hours, minutes, seconds)
     }
-
-    fun getFullDaysSince(resetTimestamp: Long, currentTimestamp: Long = System.currentTimeMillis()): Long {
-        return TimeUnit.MILLISECONDS.toDays(currentTimestamp - resetTimestamp)
-    }
 }

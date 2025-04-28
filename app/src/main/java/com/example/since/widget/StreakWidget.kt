@@ -4,41 +4,34 @@ import android.content.Context
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.glance.GlanceId
-import androidx.glance.GlanceModifier
+import androidx.glance.*
 import androidx.glance.action.actionStartActivity
 import androidx.glance.action.clickable
 import androidx.glance.appwidget.GlanceAppWidget
 import androidx.glance.appwidget.provideContent
 import androidx.glance.layout.*
-import androidx.glance.text.Text
-import androidx.glance.text.TextStyle
-import androidx.glance.text.FontWeight
-import androidx.glance.text.FontFamily
-import androidx.glance.background
+import androidx.glance.text.*
 import com.example.since.MainActivity
-import androidx.glance.GlanceTheme
 import com.example.since.data.repository.WidgetRepositoryImpl
+import com.example.since.domain.usecases.widgetusecase.GetWidgetStateUseCase
+import com.example.since.model.StreakWidgetState
 
 class StreakWidget : GlanceAppWidget() {
     override suspend fun provideGlance(context: Context, id: GlanceId) {
         val widgetRepository = WidgetRepositoryImpl(context)
+        val getWidgetStateUseCase = GetWidgetStateUseCase(widgetRepository)
+        val widgetState = getWidgetStateUseCase.invoke()
+
         provideContent {
-            MyGlanceWidgetContent(widgetRepository)
+            MyGlanceWidgetContent(widgetState)
         }
     }
 }
 
-private const val MILLIS_IN_A_DAY = 86_400_000L
-
 @Composable
-fun MyGlanceWidgetContent(widgetRepository: WidgetRepositoryImpl) {
+fun MyGlanceWidgetContent(state: StreakWidgetState) {
     GlanceTheme {
         val colors = GlanceTheme.colors
-        val resetTimestamp = widgetRepository.getResetTimestamp()
-        val days = if (resetTimestamp > 0L) {
-            (System.currentTimeMillis() - resetTimestamp) / MILLIS_IN_A_DAY
-        } else null
 
         Box(
             modifier = GlanceModifier
@@ -48,33 +41,36 @@ fun MyGlanceWidgetContent(widgetRepository: WidgetRepositoryImpl) {
                 .padding(8.dp),
             contentAlignment = Alignment.Center
         ) {
-            Column(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                if (days != null) {
-                    Text(
-                        text = "$days",
-                        style = TextStyle(
-                            color = colors.onPrimary,
-                            fontSize = 90.sp,
-                            fontWeight = FontWeight.Bold,
-                            fontFamily = FontFamily.Serif
+            when (state) {
+                is StreakWidgetState.Active -> {
+                    Column(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Text(
+                            text = "${state.days}",
+                            style = TextStyle(
+                                color = colors.onPrimary,
+                                fontSize = 90.sp,
+                                fontWeight = FontWeight.Bold,
+                                fontFamily = FontFamily.Serif
+                            )
                         )
-                    )
-                    Text(
-                        text = if (days == 1L) "day since..." else "days since...",
-                        style = TextStyle(
-                            color = colors.onPrimary,
-                            fontSize = 14.sp
+                        Text(
+                            text = if (state.days == 1L) "day since..." else "days since...",
+                            style = TextStyle(
+                                color = colors.onPrimary,
+                                fontSize = 14.sp
+                            )
                         )
-                    )
-                } else {
+                    }
+                }
+                StreakWidgetState.NoActiveStreak -> {
                     Text(
-                        text = "No active streak",
+                        text = "No active streak\nTap to start!",
                         style = TextStyle(
                             color = colors.onPrimary,
-                            fontSize = 20.sp,
+                            fontSize = 18.sp,
                             fontWeight = FontWeight.Medium,
                             fontFamily = FontFamily.SansSerif
                         )

@@ -1,0 +1,38 @@
+# Widget Final Test Checklist
+
+## 1. App freshly launched (no active streak)
+- Widget shows:
+  - "No active streak" message.
+
+## 2. Start a new streak (create first streak)
+- Widget immediately shows:
+  - "0" days counter (large text).
+- Message below says:
+  - "day since..." if 1 day
+  - "days since..." otherwise
+
+## 3. Let 24 hours pass (or manually simulate by editing timestamp if needed)
+- Widget correctly shows:
+  - "1" day after full 24h.
+
+## 4. Reset the streak
+- Widget immediately switches to:
+  - "No active streak" message.
+
+## 5. Start a new streak again
+- Widget immediately switches to:
+  - "0" days again.
+
+# If all 5 basic tests pass:
+- Widget save + load cycle is 100% clean.
+- Widget state is correctly driven by resetTimestamp + isActive.
+- No ghost data, no stale data, no random errors.
+- Production ready.
+
+# In short:
+
+- Widget shows "0 days" when starting a streak
+- Widget shows "No active streak" when reset
+- Widget responds immediately without needing manual refresh
+- ViewModel saves data cleanly with updateWidget(resetTime, isActive)
+- Architecture is clean and scalable

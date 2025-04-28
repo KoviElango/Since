@@ -3,16 +3,23 @@ package com.example.since.data.repository
 import android.content.Context
 import androidx.core.content.edit
 
-class WidgetRepositoryImpl(private val context: Context) : WidgetRepository {
+class WidgetRepositoryImpl(context: Context) : WidgetRepository {
 
     private val prefs = context.getSharedPreferences("widget_prefs", Context.MODE_PRIVATE)
 
     override fun saveResetTimestamp(timestamp: Long) {
-        prefs.edit { putLong("resetTimestamp", timestamp) }
+        prefs.edit { putLong("widget_resetTimestamp", timestamp) }
     }
 
     override fun getResetTimestamp(): Long {
-        val prefs = context.getSharedPreferences("widget_prefs", Context.MODE_PRIVATE)
-        return prefs.getLong("resetTimestamp", 0L)
+        return prefs.getLong("widget_resetTimestamp", 0L)
+    }
+
+    override fun saveIsActive(isActive: Boolean) {
+        prefs.edit { putBoolean("widget_isActive", isActive) }
+    }
+
+    override fun getIsActive(): Boolean {
+        return prefs.getBoolean("widget_isActive", false)
     }
 }
