@@ -25,11 +25,12 @@
 
 ## Screenshots
 
-![image](https://github.com/user-attachments/assets/c0d5c4ea-518b-4900-9cbf-f9cb412076a6)
+<div style="display: flex; gap: 10px;">
+  <img src="https://github.com/user-attachments/assets/c0d5c4ea-518b-4900-9cbf-f9cb412076a6" alt="Screenshot 1" width="30%" />
+  <img src="https://github.com/user-attachments/assets/a410b313-f808-4b0b-ab47-d6c43ff08b97" alt="Screenshot 2" width="30%" />
+  <img src="https://github.com/user-attachments/assets/74b933f4-1fd6-4e61-9c18-83dcce0cb1f9" alt="Screenshot 3" width="30%" />
+</div>
 
-![image](https://github.com/user-attachments/assets/a410b313-f808-4b0b-ab47-d6c43ff08b97)
-
-![image](https://github.com/user-attachments/assets/74b933f4-1fd6-4e61-9c18-83dcce0cb1f9)
 
 
 
